@@ -5635,3 +5635,346 @@
 .vmt_modal_field_third {
     flex: 0 0 calc(33.33% - 8px);
 }
+
+/* Blessings & Curses */
+.vmt_blessing_card {
+    border-left: 3px solid transparent;
+}
+
+.vmt_blessing {
+    border-left-color: #fbbf24;
+}
+
+.vmt_curse {
+    border-left-color: #a855f7;
+}
+
+.vmt_mixed {
+    border-left-color: #fbbf24;
+    box-shadow: inset 3px 0 0 #a855f7;
+}
+
+/* Masteries */
+.vmt_mastery_card .vmt_mastery_rank_badge {
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--vmt-border-subtle);
+}
+
+.vmt_mastery_progress {
+    margin: 12px 0;
+}
+
+.vmt_mastery_progress_header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--vmt-text-secondary);
+}
+
+.vmt-rank-novice { color: #9ca3af; }
+.vmt-rank-apprentice { color: #22c55e; }
+.vmt-rank-journeyman { color: #3b82f6; }
+.vmt-rank-expert { color: #a855f7; }
+.vmt-rank-master { color: #f59e0b; }
+.vmt-rank-grandmaster { color: #ef4444; }
+.vmt-rank-legendary { color: #ec4899; text-shadow: 0 0 8px #ec4899; }
+
+/* Karma Meter */
+.vmt_karma_bar {
+    height: 24px;
+    background: linear-gradient(90deg, #7f1d1d, #991b1b, #b91c1c, #6b7280, #2563eb, #1d4ed8, #1e3a8a);
+    border-radius: 4px;
+    position: relative;
+    margin: 8px 0;
+}
+
+.vmt_karma_indicator {
+    position: absolute;
+    width: 4px;
+    height: 32px;
+    background: white;
+    top: -4px;
+    transform: translateX(-50%);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.vmt_karma_labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--vmt-text-muted);
+}
+
+/* Collection grid */
+.vmt-collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+}
+
+.vmt-collection-item {
+    background: var(--vmt-bg-card);
+    border: 1px solid var(--vmt-border-subtle);
+    border-radius: 6px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vmt-collection-item.found { opacity: 1; }
+.vmt-collection-item.unfound { opacity: 0.4; filter: grayscale(1); }
+
+/* Dungeon difficulty colors */
+.vmt-diff-f { color: #9ca3af; }
+.vmt-diff-e { color: #22c55e; }
+.vmt-diff-d { color: #3b82f6; }
+.vmt-diff-c { color: #a855f7; }
+.vmt-diff-b { color: #f59e0b; }
+.vmt-diff-a { color: #ef4444; }
+.vmt-diff-s { color: #ec4899; text-shadow: 0 0 4px #ec4899; }
+.vmt-diff-ss { color: #f472b6; text-shadow: 0 0 8px #f472b6; }
+.vmt-diff-sss { color: #fbbf24; text-shadow: 0 0 12px #fbbf24; animation: pulse 2s infinite; }
+
+/* Toast notifications */
+.vmt-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 16px;
+    z-index: 10000;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    animation: slideIn 0.3s ease;
+}
+
+.vmt-toast-undo {
+    background: transparent;
+    border: none;
+    color: #3b82f6;
+    cursor: pointer;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Limitations */
+.vmt_limitation_active {
+    border-left: 3px solid #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.vmt_collapsible_header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vmt_collapse_toggle {
+    background: transparent;
+    border: none;
+    color: var(--vmt-text-secondary);
+    cursor: pointer;
+}
+
+/* Guilds */
+.vmt_primary_badge {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #3b82f6;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+}
+
+.vmt_guild_reputation {
+    margin: 8px 0;
+}
+
+.vmt_guild_reputation_header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--vmt-text-secondary);
+    margin-bottom: 4px;
+}
+
+/* Collections */
+.vmt_collection_filters,
+.vmt_collection_add {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+/* Dungeons */
+.vmt_dungeon_difficulty {
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.vmt_dungeon_progress_header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--vmt-text-secondary);
+    margin-bottom: 4px;
+}
+
+/* Talents */
+.vmt_talent_tier {
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--vmt-border-subtle);
+}
+
+.vmt_talent_tier_title {
+    font-size: 13px;
+    color: var(--vmt-text-secondary);
+    margin-bottom: 6px;
+}
+
+/* Loadouts */
+.vmt_loadout_summary {
+    font-size: 12px;
+    color: var(--vmt-text-muted);
+    margin-bottom: 8px;
+}
+
+/* Settings */
+.vmt_context_preview {
+    background: var(--vmt-bg-card);
+    border: 1px solid var(--vmt-border-subtle);
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 11px;
+    white-space: pre-wrap;
+}
+
+.vmt_pattern_row,
+.vmt_parse_history_item {
+    display: grid;
+    gap: 8px;
+}
+
+.vmt_export_area {
+    min-height: 120px;
+}
+
+.vmt_tab_panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.vmt_card_list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.vmt_card {
+    background: var(--vmt-bg-card);
+    border: 1px solid var(--vmt-border-subtle);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.vmt_card_header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.vmt_card_body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vmt_grid_2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.vmt_inline_add {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.vmt_inline_fields {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vmt_tag_list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.vmt_tag {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--vmt-border-subtle);
+    border-radius: 999px;
+    padding: 2px 6px;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.vmt_toggle_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+}
+
+.vmt_input_title {
+    flex: 1;
+    font-weight: 600;
+}
+
+.vmt_section_subheader {
+    font-size: 12px;
+    color: var(--vmt-text-secondary);
+    margin: 8px 0;
+}
+
+.vmt_range {
+    width: 100%;
+}
+
+.vmt_karma_controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.vmt_text_muted {
+    color: var(--vmt-text-muted);
+    font-size: 12px;
+}
+
+.vmt_section_body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}

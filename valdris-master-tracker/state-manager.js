@@ -9,6 +9,10 @@ const META_KEY = 'vmaster_tracker_v1';
 let _getContext = null;
 let _saveSettingsDebounced = null;
 
+function visGenId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+}
+
 // State change subscribers
 const _subscribers = [];
 
@@ -54,6 +58,7 @@ export function createEmptyState() {
     return {
         // Character basics
         characterName: 'Adventurer',
+        currentLocation: '',
 
         // Vitals
         hp: { current: 100, max: 100 },
@@ -273,6 +278,145 @@ export function createEmptyState() {
             sanity: { current: 100, max: 100, enabled: true, criticalThreshold: 20, notes: '' },
             warmth: { current: 100, max: 100, enabled: true, criticalThreshold: 20, notes: '' },
             custom: []  // { id, name, current, max, color, criticalThreshold, description }
+        },
+
+        // Blessings and curses
+        blessings: [
+            {
+                id: visGenId(),
+                name: '',
+                source: '',
+                type: 'Blessing',
+                description: '',
+                effects: [],
+                conditions: '',
+                duration: 'Permanent',
+                expiresAt: null,
+                active: true
+            }
+        ],
+
+        // Masteries
+        masteries: [
+            {
+                id: visGenId(),
+                name: '',
+                category: 'Weapon',
+                rank: 'Novice',
+                currentXP: 0,
+                xpToNext: 100,
+                description: '',
+                unlockedAbilities: [],
+                nextRankAbility: ''
+            }
+        ],
+
+        // Karma
+        karma: {
+            value: 0,
+            history: [],
+            factionKarma: [],
+            currentEffects: []
+        },
+
+        // Limitations
+        limitations: [
+            {
+                id: visGenId(),
+                name: '',
+                type: 'Weakness',
+                source: '',
+                description: '',
+                effects: [],
+                breakCondition: '',
+                penalty: '',
+                active: true
+            }
+        ],
+
+        // Collections
+        collections: {
+            monsters: [],
+            recipes: [],
+            locations: [],
+            rareItems: [],
+            achievements: []
+        },
+
+        // Guilds
+        guilds: [
+            {
+                id: visGenId(),
+                name: '',
+                type: 'Adventurer',
+                rank: '',
+                rankLevel: 0,
+                reputation: 0,
+                benefits: [],
+                duties: [],
+                joinDate: '',
+                notes: '',
+                isPrimary: false,
+                dues: ''
+            }
+        ],
+
+        // Dungeons
+        dungeons: [
+            {
+                id: visGenId(),
+                name: '',
+                location: '',
+                type: 'Natural',
+                difficulty: 'D',
+                floorsTotal: 1,
+                floorsCleared: 0,
+                bossesDefeated: [],
+                lootObtained: [],
+                status: 'Undiscovered',
+                notes: ''
+            }
+        ],
+
+        // Talents
+        talents: {
+            availablePoints: 0,
+            trees: []
+        },
+
+        // Loadouts
+        loadouts: [],
+
+        // Settings
+        settings: {
+            contextInjection: {
+                enabled: false,
+                position: 'authorNote',
+                includeStats: true,
+                includeEquipment: true,
+                includeBuffsDebuffs: true,
+                includeSurvival: true,
+                includeResources: true,
+                customHeader: '',
+                customFooter: ''
+            },
+            autoParsing: {
+                enabled: false,
+                autoApply: false,
+                showToasts: true,
+                undoWindow: 5,
+                parseCategories: {
+                    damage: true,
+                    healing: true,
+                    mana: true,
+                    xp: true,
+                    gold: true,
+                    items: true,
+                    status: true
+                },
+                customPatterns: []
+            },
+            parseHistory: []
         },
 
         // UI state
