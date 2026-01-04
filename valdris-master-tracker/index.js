@@ -38,6 +38,17 @@ import { renderTransformationsTab } from './tabs/transformations.js';
 import { renderBountiesTab } from './tabs/bounties.js';
 import { renderLegacyTab } from './tabs/legacy.js';
 import { renderSurvivalMetersTab } from './tabs/survival-meters.js';
+import { renderBlessingsTab } from './tabs/blessings.js';
+import { renderMasteriesTab } from './tabs/masteries.js';
+import { renderKarmaTab } from './tabs/karma.js';
+import { renderLimitationsTab } from './tabs/limitations.js';
+import { renderCollectionsTab } from './tabs/collections.js';
+import { renderGuildsTab } from './tabs/guilds.js';
+import { renderDungeonsTab } from './tabs/dungeons.js';
+import { renderTalentsTab } from './tabs/talents.js';
+import { renderLoadoutsTab } from './tabs/loadouts.js';
+import { renderSettingsTab } from './tabs/settings.js';
+import { buildContextBlock } from './context-utils.js';
 
 // SillyTavern module references
 let extension_settings, getContext, saveSettingsDebounced;
@@ -96,7 +107,17 @@ const TABS = [
     { key: 'transformations', label: 'Forms', icon: '' },
     { key: 'bounties', label: 'Bounties', icon: '' },
     { key: 'legacy', label: 'Legacy', icon: '' },
-    { key: 'survival', label: 'Survival', icon: '' }
+    { key: 'survival', label: 'Survival', icon: '' },
+    { key: 'blessings', label: 'Blessings', icon: '' },
+    { key: 'masteries', label: 'Masteries', icon: '' },
+    { key: 'karma', label: 'Karma', icon: '' },
+    { key: 'limitations', label: 'Limitations', icon: '' },
+    { key: 'collections', label: 'Collections', icon: '' },
+    { key: 'guilds', label: 'Guilds', icon: '' },
+    { key: 'dungeons', label: 'Dungeons', icon: '' },
+    { key: 'talents', label: 'Talents', icon: '' },
+    { key: 'loadouts', label: 'Loadouts', icon: '' },
+    { key: 'settings', label: 'Settings', icon: '' }
 ];
 
 // Cleanup tracking
@@ -285,6 +306,375 @@ function setStatus(msg) {
             }
         }, 3000);
     }
+}
+
+function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+}
+
+function showToast(message, options = {}) {
+    if (!options.show && options.show !== undefined) return null;
+    const toast = document.createElement('div');
+    toast.className = 'vmt-toast';
+    const text = document.createElement('span');
+    text.textContent = message;
+    toast.appendChild(text);
+
+    let timeoutId;
+    if (options.actionLabel && typeof options.onAction === 'function') {
+        const action = document.createElement('button');
+        action.className = 'vmt-toast-undo';
+        action.textContent = options.actionLabel;
+        action.addEventListener('click', () => {
+            options.onAction();
+            toast.remove();
+            if (timeoutId) clearTimeout(timeoutId);
+        });
+        toast.appendChild(action);
+    }
+
+    document.body.appendChild(toast);
+    if (options.duration) {
+        timeoutId = setTimeout(() => toast.remove(), options.duration);
+    }
+    return toast;
+}
+
+function normalizeRegex(pattern) {
+    if (!pattern) return null;
+    if (pattern.startsWith('/') && pattern.lastIndexOf('/') > 0) {
+        const lastSlash = pattern.lastIndexOf('/');
+        const body = pattern.slice(1, lastSlash);
+        const flags = pattern.slice(lastSlash + 1) || 'gi';
+        return new RegExp(body, flags);
+    }
+    return new RegExp(pattern, 'gi');
+}
+
+function getMessageContent(messageId) {
+    const ctx = getContext?.();
+    const chat = ctx?.chat || ctx?.messages || [];
+    const message = chat.find(entry => entry.id === messageId || entry.index === messageId) || chat[messageId];
+    return message?.mes || message?.message || message?.content || '';
+}
+
+async function recordParseHistory(summary, message, applied) {
+    const state = getState();
+    const history = [...(state.settings?.parseHistory || [])];
+    history.push({
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        summary,
+        message: message?.slice(0, 200) || '',
+        applied: Boolean(applied)
+    });
+    await updateField('settings.parseHistory', history.slice(-100));
+}
+
+async function applyResourceDelta(path, delta, min, max) {
+    const state = getState();
+    const current = path.split('.').reduce((acc, key) => acc?.[key], state) ?? 0;
+    const next = clamp(current + delta, min, max);
+    await updateField(path, next);
+    return async () => updateField(path, current);
+}
+
+async function applySetValue(path, value) {
+    const state = getState();
+    const current = path.split('.').reduce((acc, key) => acc?.[key], state);
+    await updateField(path, value);
+    return async () => updateField(path, current);
+}
+
+async function applyItemGains(items) {
+    const state = getState();
+    const inventory = [...(state.inventory || [])];
+    const addedIds = [];
+    const incrementedCounts = {};
+    const counts = items.reduce((acc, name) => {
+        acc[name] = (acc[name] || 0) + 1;
+        return acc;
+    }, {});
+
+    Object.entries(counts).forEach(([name, count]) => {
+        const existing = inventory.find(item => item.name === name);
+        if (existing) {
+            existing.quantity = (existing.quantity || 1) + count;
+            incrementedCounts[name] = count;
+        } else {
+            const id = Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+            inventory.push({ id, name, quantity: count });
+            addedIds.push(id);
+        }
+    });
+    await updateField('inventory', inventory);
+    return async () => {
+        const current = [...(getState().inventory || [])];
+        const updated = current
+            .map(item => {
+                if (addedIds.includes(item.id)) return null;
+                const decrement = incrementedCounts[item.name];
+                if (decrement) {
+                    const nextQty = (item.quantity || 1) - decrement;
+                    if (nextQty <= 0) return null;
+                    return { ...item, quantity: nextQty };
+                }
+                return item;
+            })
+            .filter(Boolean);
+        await updateField('inventory', updated);
+    };
+}
+
+async function applyStatusGains(statuses) {
+    const state = getState();
+    const buffs = [...(state.buffs || [])];
+    const added = [];
+    statuses.forEach(status => {
+        if (!buffs.find(buff => buff.name === status)) {
+            buffs.push({ name: status, effect: '' });
+            added.push(status);
+        }
+    });
+    await updateField('buffs', buffs);
+    return async () => {
+        const current = [...(getState().buffs || [])];
+        const next = current.filter(buff => !added.includes(buff.name));
+        await updateField('buffs', next);
+    };
+}
+
+async function parseMessageForChanges(text) {
+    const state = getState();
+    const autoParsing = state.settings?.autoParsing;
+    if (!autoParsing?.enabled || !text) return;
+
+    const categories = autoParsing.parseCategories || {};
+    const changes = [];
+
+    const patterns = {
+        damage: /(?:takes?|receives?|suffers?)\s+(\d+)\s+(?:points?\s+of\s+)?damage/gi,
+        healing: /(?:heals?|recovers?|restores?)\s+(\d+)\s+(?:HP|health|hit\s+points?)/gi,
+        manaUse: /(?:spends?|uses?|costs?)\s+(\d+)\s+(?:MP|mana|magic)/gi,
+        manaRestore: /(?:recovers?|restores?|regains?)\s+(\d+)\s+(?:MP|mana)/gi,
+        xpGain: /(?:gains?|earns?|receives?)\s+(\d+)\s+(?:XP|experience)/gi,
+        levelUp: /(?:levels?\s+up|reached?\s+level|now\s+level)\s+(\d+)/gi,
+        goldGain: /(?:gains?|finds?|receives?|loots?)\s+(\d+)\s+gold/gi,
+        goldLoss: /(?:spends?|pays?|loses?)\s+(\d+)\s+gold/gi,
+        itemGain: /(?:obtains?|receives?|finds?|picks?\s+up)\s+(?:a\s+|the\s+)?([A-Z][^.!?]+?)(?:\.|!|\?|$)/gi,
+        statusGain: /(?:is\s+now|becomes?|gains?\s+the\s+status)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/gi
+    };
+
+    const sumMatches = (regex) => {
+        let total = 0;
+        regex.lastIndex = 0;
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            total += Number(match[1] || 0);
+        }
+        return total;
+    };
+
+    if (categories.damage) {
+        const amount = sumMatches(patterns.damage);
+        if (amount > 0) {
+            changes.push({
+                summary: `-${amount} HP`,
+                apply: () => applyResourceDelta('hp.current', -amount, 0, state.hp?.max ?? 0)
+            });
+        }
+    }
+
+    if (categories.healing) {
+        const amount = sumMatches(patterns.healing);
+        if (amount > 0) {
+            changes.push({
+                summary: `+${amount} HP`,
+                apply: () => applyResourceDelta('hp.current', amount, 0, state.hp?.max ?? 0)
+            });
+        }
+    }
+
+    if (categories.mana) {
+        const spent = sumMatches(patterns.manaUse);
+        const restored = sumMatches(patterns.manaRestore);
+        if (spent > 0) {
+            changes.push({
+                summary: `-${spent} MP`,
+                apply: () => applyResourceDelta('mp.current', -spent, 0, state.mp?.max ?? 0)
+            });
+        }
+        if (restored > 0) {
+            changes.push({
+                summary: `+${restored} MP`,
+                apply: () => applyResourceDelta('mp.current', restored, 0, state.mp?.max ?? 0)
+            });
+        }
+    }
+
+    if (categories.xp) {
+        const xp = sumMatches(patterns.xpGain);
+        if (xp > 0) {
+            changes.push({
+                summary: `+${xp} XP`,
+                apply: () => applyResourceDelta('xp.current', xp, 0, Number.MAX_SAFE_INTEGER)
+            });
+        }
+        patterns.levelUp.lastIndex = 0;
+        const levelMatch = patterns.levelUp.exec(text);
+        if (levelMatch) {
+            const level = Number(levelMatch[1]);
+            if (!Number.isNaN(level)) {
+                changes.push({
+                    summary: `Level ${level}`,
+                    apply: () => applySetValue('level', level)
+                });
+            }
+        }
+    }
+
+    if (categories.gold) {
+        const gained = sumMatches(patterns.goldGain);
+        const lost = sumMatches(patterns.goldLoss);
+        if (gained > 0) {
+            changes.push({
+                summary: `+${gained} gold`,
+                apply: () => applyResourceDelta('currencies.gold', gained, 0, Number.MAX_SAFE_INTEGER)
+            });
+        }
+        if (lost > 0) {
+            changes.push({
+                summary: `-${lost} gold`,
+                apply: () => applyResourceDelta('currencies.gold', -lost, 0, Number.MAX_SAFE_INTEGER)
+            });
+        }
+    }
+
+    if (categories.items) {
+        const items = [];
+        patterns.itemGain.lastIndex = 0;
+        let match;
+        while ((match = patterns.itemGain.exec(text)) !== null) {
+            if (match[1]) items.push(match[1].trim());
+        }
+        if (items.length) {
+            changes.push({
+                summary: `Items: ${items.join(', ')}`,
+                apply: () => applyItemGains(items)
+            });
+        }
+    }
+
+    if (categories.status) {
+        const statuses = [];
+        patterns.statusGain.lastIndex = 0;
+        let match;
+        while ((match = patterns.statusGain.exec(text)) !== null) {
+            if (match[1]) statuses.push(match[1].trim());
+        }
+        if (statuses.length) {
+            changes.push({
+                summary: `Status: ${statuses.join(', ')}`,
+                apply: () => applyStatusGains(statuses)
+            });
+        }
+    }
+
+    (autoParsing.customPatterns || []).forEach(pattern => {
+        if (pattern.enabled === false) return;
+        const regex = normalizeRegex(pattern.pattern);
+        if (!regex) return;
+        let match;
+        regex.lastIndex = 0;
+        while ((match = regex.exec(text)) !== null) {
+            if (pattern.field === 'item' && match[1]) {
+                changes.push({
+                    summary: `Item: ${match[1]}`,
+                    apply: () => applyItemGains([match[1].trim()])
+                });
+            } else if (pattern.field === 'status' && match[1]) {
+                changes.push({
+                    summary: `Status: ${match[1]}`,
+                    apply: () => applyStatusGains([match[1].trim()])
+                });
+            } else if (match[1]) {
+                const value = Number(match[1]);
+                if (Number.isNaN(value)) return;
+                const operation = pattern.operation || '+';
+                const field = pattern.field || '';
+                const pathMap = {
+                    hp: 'hp.current',
+                    mp: 'mp.current',
+                    sp: 'stamina.current',
+                    xp: 'xp.current',
+                    gold: 'currencies.gold'
+                };
+                const path = pathMap[field];
+                if (!path) return;
+                if (operation === 'set') {
+                    changes.push({
+                        summary: `Set ${field.toUpperCase()} ${value}`,
+                        apply: () => applySetValue(path, value)
+                    });
+                } else {
+                    const delta = operation === '-' ? -value : value;
+                    changes.push({
+                        summary: `${delta >= 0 ? '+' : ''}${delta} ${field.toUpperCase()}`,
+                        apply: () => applyResourceDelta(path, delta, 0, Number.MAX_SAFE_INTEGER)
+                    });
+                }
+            }
+        }
+    });
+
+    if (!changes.length) return;
+
+    const summary = changes.map(change => change.summary).join(' | ');
+    const applyAll = async () => {
+        const undoStack = [];
+        for (const change of changes) {
+            const undo = await change.apply();
+            if (undo) undoStack.push(undo);
+        }
+        await recordParseHistory(summary, text, true);
+        if (autoParsing.showToasts) {
+            const undoWindow = (autoParsing.undoWindow || 5) * 1000;
+            showToast(`Applied: ${summary}`, {
+                actionLabel: 'Undo',
+                duration: undoWindow,
+                show: autoParsing.showToasts,
+                onAction: () => {
+                    undoStack.reverse().forEach(undo => undo());
+                }
+            });
+        }
+    };
+
+    if (autoParsing.autoApply) {
+        await applyAll();
+    } else {
+        await recordParseHistory(`Pending: ${summary}`, text, false);
+        showToast(`Detected: ${summary}`, {
+            actionLabel: 'Apply',
+            duration: (autoParsing.undoWindow || 5) * 1000,
+            show: autoParsing.showToasts,
+            onAction: applyAll
+        });
+    }
+}
+
+function injectContextBlock(data, block, position) {
+    if (!data || !block) return;
+    const positionKeys = {
+        authorNote: ['author_note', 'authorNote', 'author_note_text', 'authorNoteText'],
+        systemPrompt: ['system_prompt', 'systemPrompt', 'system'],
+        worldInfo: ['world_info', 'worldInfo', 'worldInfoString']
+    };
+
+    const keys = positionKeys[position] || positionKeys.authorNote;
+    const targetKey = keys.find(key => typeof data[key] === 'string') || keys[0];
+    const existing = data[targetKey] || '';
+    data[targetKey] = existing ? `${existing}\n${block}` : block;
 }
 
 /**
@@ -3208,6 +3598,36 @@ function render() {
         case 'survival':
             body.appendChild(renderSurvivalMetersTab(openModal, render));
             break;
+        case 'blessings':
+            body.appendChild(renderBlessingsTab(openModal, render));
+            break;
+        case 'masteries':
+            body.appendChild(renderMasteriesTab(openModal, render));
+            break;
+        case 'karma':
+            body.appendChild(renderKarmaTab(openModal, render));
+            break;
+        case 'limitations':
+            body.appendChild(renderLimitationsTab(openModal, render));
+            break;
+        case 'collections':
+            body.appendChild(renderCollectionsTab(openModal, render));
+            break;
+        case 'guilds':
+            body.appendChild(renderGuildsTab(openModal, render));
+            break;
+        case 'dungeons':
+            body.appendChild(renderDungeonsTab(openModal, render));
+            break;
+        case 'talents':
+            body.appendChild(renderTalentsTab(openModal, render));
+            break;
+        case 'loadouts':
+            body.appendChild(renderLoadoutsTab(openModal, render));
+            break;
+        case 'settings':
+            body.appendChild(renderSettingsTab(openModal, render));
+            break;
         default:
             body.textContent = 'Unknown tab';
     }
@@ -3226,6 +3646,21 @@ function registerEvents() {
     eventSource.on(event_types.CHAT_CHANGED, () => {
         console.log('[VMasterTracker] Chat changed, re-rendering');
         render();
+    });
+
+    eventSource.on(event_types.GENERATE_BEFORE_COMBINE_PROMPTS, (data) => {
+        const state = getState();
+        const settings = state.settings?.contextInjection;
+        if (!settings?.enabled) return;
+        const block = buildContextBlock(state, settings);
+        injectContextBlock(data, block, settings.position);
+    });
+
+    eventSource.on(event_types.MESSAGE_RECEIVED, async (messageId) => {
+        const state = getState();
+        if (!state.settings?.autoParsing?.enabled) return;
+        const message = getMessageContent(messageId);
+        await parseMessageForChanges(message);
     });
 
     console.log('[VMasterTracker] Events registered');
