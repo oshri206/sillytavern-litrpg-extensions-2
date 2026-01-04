@@ -1,0 +1,15 @@
+{
+    "display_name": "Valdris Master Tracker",
+    "loading_order": 10,
+    "requires": [],
+    "optional": [],
+    "dependencies": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Valdris",
+    "version": "1.0.0",
+    "description": "Comprehensive character tracker with HP/MP/Stamina bars, stats, class management, and multiclass support for LitRPG roleplay",
+    "auto_update": false,
+    "minimum_client_version": "1.12.0",
+    "homePage": ""
+}
