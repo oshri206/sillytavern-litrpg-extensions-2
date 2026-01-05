@@ -387,6 +387,27 @@ export function createEmptyState() {
         // Loadouts
         loadouts: [],
 
+        // Wounds - injuries that heal over time
+        wounds: [],
+        // Structure: { id, type, severity: 'minor'|'moderate'|'severe'|'critical', location,
+        //              receivedDate: { year, month, day }, healingDays, daysRemaining,
+        //              healingModifiers: [], effects: [], treated: boolean, notes }
+
+        // Training - skill training over time
+        training: [],
+        // Structure: { id, skill, type: 'skill'|'spell'|'proficiency'|'language',
+        //              trainer, location, totalHours, completedHours,
+        //              sessionsLog: [{ date, hours, notes }], costPerSession, totalSpent,
+        //              prerequisites: [], rewards: [], status: 'planned'|'in_progress'|'completed'|'abandoned' }
+
+        // Companions enhancement - already exists but adding needs/morale tracking
+        // Each companion now supports:
+        // needs: { hunger: { current, max, decayRate }, morale: { current, max, decayRate },
+        //          rest: { current, max, decayRate }, loyalty: { current, max, decayRate } }
+        // lastFed: { year, month, day }, lastRested: { year, month, day }
+        // moodState: 'miserable'|'unhappy'|'neutral'|'content'|'happy'|'ecstatic'
+        // moodEffects: []
+
         // Settings
         settings: {
             contextInjection: {

@@ -1,0 +1,482 @@
+/**
+ * Valdris Economy Services - Styles
+ */
+
+/* Launcher */
+.ves_launcher {
+    position: fixed;
+    right: 80px;
+    bottom: 80px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--valdris-gold, #FFD700);
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 999;
+    transition: transform 0.2s ease;
+}
+
+.ves_launcher:hover {
+    transform: scale(1.1);
+}
+
+/* Container */
+.ves_container {
+    position: fixed;
+    right: 80px;
+    bottom: 140px;
+    width: 400px;
+    max-height: 70vh;
+    font-family: var(--valdris-font, system-ui, -apple-system, sans-serif);
+    font-size: 13px;
+    z-index: 1000;
+}
+
+.ves_container.ves_hidden {
+    display: none;
+}
+
+/* Panel */
+.ves_panel {
+    background: var(--valdris-bg, #1a1a2e);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+}
+
+.ves_panel_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border-bottom: 1px solid var(--valdris-border, #3a3a4a);
+}
+
+.ves_panel_header h2 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+/* Tabs */
+.ves_tabs {
+    display: flex;
+    border-bottom: 1px solid var(--valdris-border, #3a3a4a);
+}
+
+.ves_tab_btn {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    color: var(--valdris-text-muted, #9999aa);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.ves_tab_btn:hover {
+    background: var(--valdris-bg-hover, #2a2a3a);
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.ves_tab_btn.active {
+    color: var(--valdris-gold, #FFD700);
+    border-bottom: 2px solid var(--valdris-gold, #FFD700);
+}
+
+.ves_panel_body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.ves_tab_content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Section */
+.ves_section {
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.ves_section h3 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.ves_section_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.ves_section_header h3 {
+    margin: 0;
+}
+
+/* Total Wealth */
+.ves_total_wealth {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--valdris-gold, #FFD700);
+    text-align: center;
+    padding: 12px;
+    margin-bottom: 16px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Currency Grid */
+.ves_currency_grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.ves_currency_item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--valdris-bg, #1a1a2e);
+    padding: 8px 10px;
+    border-radius: 6px;
+}
+
+.ves_currency_icon {
+    font-size: 18px;
+}
+
+.ves_currency_input {
+    width: 70px;
+    padding: 6px 8px;
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 4px;
+    color: var(--valdris-text, #e2e2e9);
+    font-size: 14px;
+    text-align: right;
+}
+
+.ves_currency_input:focus {
+    outline: none;
+    border-color: var(--valdris-gold, #FFD700);
+}
+
+.ves_currency_name {
+    font-size: 12px;
+    color: var(--valdris-text-muted, #9999aa);
+    text-transform: uppercase;
+}
+
+/* Market Selector */
+.ves_market_selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.ves_market_btn {
+    padding: 6px 12px;
+    background: var(--valdris-bg, #1a1a2e);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 4px;
+    color: var(--valdris-text-muted, #9999aa);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.ves_market_btn:hover {
+    border-color: var(--valdris-gold, #FFD700);
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.ves_market_btn.active {
+    background: var(--valdris-gold, #FFD700);
+    border-color: var(--valdris-gold, #FFD700);
+    color: #000;
+}
+
+/* Transaction List */
+.ves_transaction_list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ves_transaction {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background: var(--valdris-bg, #1a1a2e);
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.ves_trans_type {
+    font-size: 14px;
+}
+
+.ves_transaction.purchase .ves_trans_price {
+    color: #F44336;
+}
+
+.ves_transaction.sale .ves_trans_price {
+    color: #4CAF50;
+}
+
+.ves_trans_item {
+    flex: 1;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.ves_trans_price {
+    font-weight: 600;
+}
+
+/* Shop List */
+.ves_shop_list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ves_shop_card {
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.ves_shop_header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.ves_shop_icon {
+    font-size: 20px;
+}
+
+.ves_shop_info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ves_shop_name {
+    font-weight: 600;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.ves_shop_type {
+    font-size: 11px;
+    color: var(--valdris-text-muted, #9999aa);
+}
+
+.ves_shop_location {
+    font-size: 12px;
+    color: var(--valdris-text-muted, #9999aa);
+    margin-bottom: 6px;
+}
+
+.ves_shop_meta {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--valdris-text-muted, #9999aa);
+}
+
+/* Service List */
+.ves_service_category {
+    margin-bottom: 16px;
+}
+
+.ves_service_category:last-child {
+    margin-bottom: 0;
+}
+
+.ves_service_category h4 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    color: var(--valdris-text-muted, #9999aa);
+    text-transform: uppercase;
+}
+
+.ves_service_list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ves_service_item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 8px;
+    background: var(--valdris-bg, #1a1a2e);
+    border-radius: 4px;
+}
+
+.ves_service_name {
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.ves_service_price {
+    color: var(--valdris-gold, #FFD700);
+    font-weight: 500;
+}
+
+.ves_info_text {
+    font-size: 11px;
+    color: var(--valdris-text-muted, #9999aa);
+    font-style: italic;
+    margin-bottom: 12px;
+}
+
+/* Buttons */
+.ves_btn {
+    padding: 8px 16px;
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 6px;
+    color: var(--valdris-text, #e2e2e9);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.ves_btn:hover {
+    background: var(--valdris-bg-hover, #3a3a4a);
+}
+
+.ves_btn_primary {
+    background: var(--valdris-gold, #FFD700);
+    border-color: var(--valdris-gold, #FFD700);
+    color: #000;
+}
+
+.ves_btn_primary:hover {
+    background: #e6c200;
+}
+
+.ves_btn_icon {
+    padding: 4px 8px;
+    background: transparent;
+    border: none;
+    color: var(--valdris-text-muted, #9999aa);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.ves_btn_icon:hover {
+    color: var(--valdris-text, #e2e2e9);
+}
+
+/* Modal */
+.ves_modal_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.ves_modal {
+    background: var(--valdris-bg, #1a1a2e);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 12px;
+    min-width: 320px;
+    max-width: 450px;
+}
+
+.ves_modal_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--valdris-border, #3a3a4a);
+}
+
+.ves_modal_header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.ves_modal_body {
+    padding: 16px;
+}
+
+.ves_modal_form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ves_form_row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ves_form_row label {
+    font-size: 11px;
+    color: var(--valdris-text-muted, #9999aa);
+    text-transform: uppercase;
+}
+
+.ves_input,
+.ves_select {
+    padding: 8px 10px;
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 6px;
+    color: var(--valdris-text, #e2e2e9);
+    font-size: 13px;
+}
+
+.ves_input:focus,
+.ves_select:focus {
+    outline: none;
+    border-color: var(--valdris-gold, #FFD700);
+}
+
+.ves_modal_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--valdris-border, #3a3a4a);
+}
+
+/* Empty */
+.ves_empty {
+    text-align: center;
+    padding: 24px;
+    color: var(--valdris-text-muted, #9999aa);
+    font-style: italic;
+}

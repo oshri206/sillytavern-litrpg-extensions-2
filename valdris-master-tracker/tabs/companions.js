@@ -50,6 +50,62 @@ const BOND_LEVELS = [
 ];
 
 /**
+ * Mood states based on needs
+ */
+const MOOD_STATES = {
+    miserable: { name: 'Miserable', color: '#dd3333', icon: '', effects: ['-30% performance', 'May flee'] },
+    unhappy: { name: 'Unhappy', color: '#dd6644', icon: '', effects: ['-15% performance'] },
+    neutral: { name: 'Neutral', color: '#888888', icon: '', effects: [] },
+    content: { name: 'Content', color: '#66aa66', icon: '', effects: [] },
+    happy: { name: 'Happy', color: '#55cc77', icon: '', effects: ['+10% performance'] },
+    ecstatic: { name: 'Ecstatic', color: '#44dddd', icon: '', effects: ['+20% performance', 'Bonus loyalty'] }
+};
+
+/**
+ * Default needs structure for a companion
+ */
+function getDefaultNeeds() {
+    return {
+        hunger: { current: 100, max: 100, decayRate: 10 },
+        morale: { current: 100, max: 100, decayRate: 5 },
+        rest: { current: 100, max: 100, decayRate: 15 },
+        loyalty: { current: 80, max: 100, decayRate: 1 }
+    };
+}
+
+/**
+ * Calculate mood state from needs
+ */
+function calculateMoodState(needs) {
+    if (!needs) return 'neutral';
+
+    const avgNeed = (
+        (needs.hunger?.current || 100) +
+        (needs.morale?.current || 100) +
+        (needs.rest?.current || 100)
+    ) / 3;
+
+    if (avgNeed < 20) return 'miserable';
+    if (avgNeed < 40) return 'unhappy';
+    if (avgNeed < 60) return 'neutral';
+    if (avgNeed < 80) return 'content';
+    if (avgNeed < 95) return 'happy';
+    return 'ecstatic';
+}
+
+/**
+ * Get need status color
+ */
+function getNeedColor(current, max) {
+    const percent = (current / max) * 100;
+    if (percent <= 20) return '#dd3333';
+    if (percent <= 40) return '#dd6644';
+    if (percent <= 60) return '#ddaa33';
+    if (percent <= 80) return '#66aa66';
+    return '#55cc77';
+}
+
+/**
  * Get bond level from score
  */
 function getBondLevel(score) {
@@ -96,11 +152,34 @@ function getTypeIcon(type) {
 }
 
 /**
+ * Create a need bar element
+ */
+function createNeedBar(label, need, onAdjust) {
+    const percent = ((need?.current || 0) / (need?.max || 100)) * 100;
+    const color = getNeedColor(need?.current || 0, need?.max || 100);
+
+    return h('div', { class: 'vmt_companion_need' },
+        h('div', { class: 'vmt_need_header' },
+            h('span', { class: 'vmt_need_label' }, label),
+            h('span', { class: 'vmt_need_value' }, `${need?.current || 0}`)
+        ),
+        h('div', { class: 'vmt_need_bar' },
+            h('div', {
+                class: 'vmt_need_fill',
+                style: `width: ${percent}%; background: ${color}`
+            })
+        )
+    );
+}
+
+/**
  * Create a companion card
  */
-function createCompanionCard(companion, index, onEdit, onDelete, onStatusChange) {
+function createCompanionCard(companion, index, onEdit, onDelete, onStatusChange, onNeedAdjust) {
     const bondLevel = getBondLevel(companion.bond || 50);
     const statusColor = getStatusColor(companion.status);
+    const moodState = calculateMoodState(companion.needs);
+    const moodData = MOOD_STATES[moodState] || MOOD_STATES.neutral;
 
     return h('div', { class: `vmt_companion_card vmt_companion_${companion.type?.toLowerCase() || 'pet'}` },
         h('div', { class: 'vmt_companion_header' },
@@ -162,6 +241,39 @@ function createCompanionCard(companion, index, onEdit, onDelete, onStatusChange)
                 })
             )
         ),
+        // Mood indicator (if needs are tracked)
+        companion.needs ?
+            h('div', { class: 'vmt_companion_mood' },
+                h('div', { class: 'vmt_mood_header' },
+                    h('span', { class: 'vmt_mood_label' }, 'Mood: '),
+                    h('span', {
+                        class: 'vmt_mood_state',
+                        style: `color: ${moodData.color}`
+                    }, `${moodData.icon} ${moodData.name}`)
+                ),
+                h('div', { class: 'vmt_companion_needs' },
+                    createNeedBar('Hunger', companion.needs.hunger),
+                    createNeedBar('Morale', companion.needs.morale),
+                    createNeedBar('Rest', companion.needs.rest)
+                ),
+                h('div', { class: 'vmt_needs_actions' },
+                    h('button', {
+                        class: 'vmt_btn_small',
+                        onclick: () => onNeedAdjust(index, 'feed'),
+                        title: 'Feed companion'
+                    }, 'Feed'),
+                    h('button', {
+                        class: 'vmt_btn_small',
+                        onclick: () => onNeedAdjust(index, 'rest'),
+                        title: 'Rest companion'
+                    }, 'Rest'),
+                    h('button', {
+                        class: 'vmt_btn_small',
+                        onclick: () => onNeedAdjust(index, 'play'),
+                        title: 'Boost morale'
+                    }, 'Play')
+                )
+            ) : null,
         // Abilities
         companion.abilities ?
             h('div', { class: 'vmt_companion_abilities' },
@@ -317,6 +429,41 @@ export function renderCompanionsTab(openModal, render) {
                     list[idx] = { ...list[idx], status: newStatus };
                     await updateField('companions', list);
                     render();
+                },
+                // Need adjust
+                async (idx, action) => {
+                    const list = [...companions];
+                    const comp = list[idx];
+                    // Initialize needs if not present
+                    if (!comp.needs) {
+                        comp.needs = getDefaultNeeds();
+                    }
+                    const needs = { ...comp.needs };
+
+                    switch (action) {
+                        case 'feed':
+                            needs.hunger = {
+                                ...needs.hunger,
+                                current: Math.min(needs.hunger.max, (needs.hunger.current || 0) + 50)
+                            };
+                            break;
+                        case 'rest':
+                            needs.rest = {
+                                ...needs.rest,
+                                current: Math.min(needs.rest.max, (needs.rest.current || 0) + 50)
+                            };
+                            break;
+                        case 'play':
+                            needs.morale = {
+                                ...needs.morale,
+                                current: Math.min(needs.morale.max, (needs.morale.current || 0) + 30)
+                            };
+                            break;
+                    }
+
+                    list[idx] = { ...comp, needs };
+                    await updateField('companions', list);
+                    render();
                 }
             ));
         });
@@ -327,3 +474,36 @@ export function renderCompanionsTab(openModal, render) {
 
     return container;
 }
+
+/**
+ * Process companion needs decay for a new day
+ * Call this when ValdrisEventBus emits 'newDay'
+ */
+export function processCompanionNeeds(companions) {
+    return companions.map(comp => {
+        if (!comp.needs) return comp;
+
+        const needs = { ...comp.needs };
+
+        // Decay each need based on its decay rate
+        for (const [key, need] of Object.entries(needs)) {
+            if (need && typeof need.current === 'number' && typeof need.decayRate === 'number') {
+                needs[key] = {
+                    ...need,
+                    current: Math.max(0, need.current - need.decayRate)
+                };
+            }
+        }
+
+        // Update mood state
+        const moodState = calculateMoodState(needs);
+
+        return {
+            ...comp,
+            needs,
+            moodState
+        };
+    });
+}
+
+export { MOOD_STATES, getDefaultNeeds, calculateMoodState };

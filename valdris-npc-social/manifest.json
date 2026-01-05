@@ -1,0 +1,11 @@
+{
+    "display_name": "Valdris NPC Social",
+    "loading_order": 5,
+    "requires": ["valdris-core"],
+    "optional": ["valdris-world-state", "valdris-factions-politics"],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Valdris Suite",
+    "version": "1.0.0",
+    "description": "NPC tracking with relationships, dispositions, and social networks"
+}
