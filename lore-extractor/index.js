@@ -234,16 +234,16 @@ async function createLoreEntry(lorebook, extraction) {
         newEntry.content = extraction.content || '';
         newEntry.comment = extraction.name || 'Extracted Lore';
 
-        // Mode settings
-        newEntry.constant = false;
-        newEntry.vectorized = true;  // Enable vectorized for better matching
-        newEntry.selective = true;
+        // Mode settings - use Constant (blue dot, always active)
+        newEntry.constant = true;
+        newEntry.vectorized = false;
+        newEntry.selective = false;
         newEntry.selectiveLogic = 0;
 
-        // Position and order
-        newEntry.position = 4; // Before character defs
+        // Position: 0 = ↑Char (before character defs)
+        newEntry.position = 0;
         newEntry.order = 100;
-        newEntry.depth = 4;
+        newEntry.depth = null;  // Not used for constant entries
 
         // Recursion settings
         newEntry.preventRecursion = false;
