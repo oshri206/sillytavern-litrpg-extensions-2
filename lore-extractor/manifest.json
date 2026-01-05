@@ -1,0 +1,13 @@
+{
+    "display_name": "LoreExtractor",
+    "loading_order": 10,
+    "requires": [],
+    "optional": ["valdris-core"],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "LoreExtractor",
+    "version": "1.0.0",
+    "description": "Automatically extracts lore (NPCs, locations, items, events, factions, relationships, abilities) from roleplay messages and creates persistent lorebook entries",
+    "auto_update": false,
+    "minimum_client_version": "1.12.0"
+}
