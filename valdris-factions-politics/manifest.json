@@ -1,0 +1,11 @@
+{
+    "display_name": "Valdris Factions & Politics",
+    "loading_order": 7,
+    "requires": ["valdris-core"],
+    "optional": ["valdris-world-state", "valdris-npc-social"],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Valdris Suite",
+    "version": "1.0.0",
+    "description": "Faction tracking - standings, politics, power dynamics, and conflicts"
+}
