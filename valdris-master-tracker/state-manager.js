@@ -558,6 +558,7 @@ export async function updateState(updates) {
  * Update a specific field using a path (e.g., 'hp.current')
  */
 export async function updateField(path, value) {
+    console.log('[VMasterTracker] updateField called:', path, '=', value);
     return await stateMutex.withLock(async () => {
         const md = getChatMetadata();
         if (md) {
@@ -565,10 +566,16 @@ export async function updateField(path, value) {
                 md[META_KEY] = createEmptyState();
             }
             setNestedValue(md[META_KEY], path, value);
-            await saveChatMetadata();
+            const saved = await saveChatMetadata();
+            if (saved) {
+                console.log('[VMasterTracker] updateField complete, saved to metadata');
+            } else {
+                console.warn('[VMasterTracker] updateField failed to save metadata');
+            }
             notifySubscribers(md[META_KEY]);
             return true;
         }
+        console.warn('[VMasterTracker] updateField skipped: no metadata available');
         return false;
     });
 }
