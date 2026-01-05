@@ -1,0 +1,13 @@
+{
+    "display_name": "Valdris Time & Celestial",
+    "loading_order": 2,
+    "requires": ["valdris-core"],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Lite",
+    "version": "1.0.0",
+    "description": "Time tracking, weather generation, moon phases, and calendar system for Valdris. Intelligently parses AI responses to advance time based on scene context.",
+    "auto_update": false,
+    "minimum_client_version": "1.12.0"
+}
