@@ -681,7 +681,6 @@ async function init() {
             const extModule = await import('../../../extensions.js');
             getContext = extModule.getContext;
             extension_settings = extModule.extension_settings;
-            saveSettingsDebounced = extModule.saveSettingsDebounced;
         } catch (e) {
             console.error(`${LOG_PREFIX} Failed to import extensions.js:`, e);
             return;
@@ -692,6 +691,7 @@ async function init() {
             eventSource = scriptModule.eventSource;
             event_types = scriptModule.event_types;
             generateQuietPrompt = scriptModule.generateQuietPrompt;
+            saveSettingsDebounced = scriptModule.saveSettingsDebounced;
         } catch (e) {
             console.error(`${LOG_PREFIX} Failed to import script.js:`, e);
             return;
