@@ -303,7 +303,7 @@ async function extractLore(forceExtract = false) {
         // Send to AI
         let response;
         try {
-            response = await generateQuietPrompt(prompt, false, false);
+            response = await generateQuietPrompt({ quietPrompt: prompt });
         } catch (e) {
             console.error(`${LOG_PREFIX} AI request failed:`, e);
             showNotification('Extraction failed: AI request error', 'error');
