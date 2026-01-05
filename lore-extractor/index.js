@@ -25,6 +25,7 @@ let createWorldInfoEntry = null;
 let loadWorldInfo = null;
 let saveWorldInfo = null;
 let reloadEditor = null;
+let METADATA_KEY = null;
 
 // ============================================================================
 // Default Settings
@@ -158,11 +159,12 @@ async function getOrCreateChatLorebook() {
 
     const settings = getSettings();
 
-    // If a target lorebook is specified, use it
+    // If a target lorebook is specified in settings, use it
     if (settings.targetLorebook) {
         try {
             const data = await loadWorldInfo(settings.targetLorebook);
             if (data) {
+                console.log(`${LOG_PREFIX} Using target lorebook: ${settings.targetLorebook}`);
                 return { name: settings.targetLorebook, data };
             }
         } catch (e) {
@@ -170,20 +172,26 @@ async function getOrCreateChatLorebook() {
         }
     }
 
-    // Try to get chat-bound lorebook
-    const chatMetadata = context.chat_metadata;
-    if (chatMetadata?.world_info) {
+    // Try to get chat-bound lorebook using METADATA_KEY (matching MemoryBooks pattern)
+    // SillyTavern stores the lorebook name in chatMetadata[METADATA_KEY]
+    const chatMetadata = context.chatMetadata;
+    if (chatMetadata && METADATA_KEY && chatMetadata[METADATA_KEY]) {
+        const lorebookName = chatMetadata[METADATA_KEY];
+        console.log(`${LOG_PREFIX} Found chat-bound lorebook: ${lorebookName}`);
         try {
-            const data = await loadWorldInfo(chatMetadata.world_info);
+            const data = await loadWorldInfo(lorebookName);
             if (data) {
-                return { name: chatMetadata.world_info, data };
+                console.log(`${LOG_PREFIX} Successfully loaded chat-bound lorebook: ${lorebookName}`);
+                return { name: lorebookName, data };
             }
         } catch (e) {
-            console.warn(`${LOG_PREFIX} Failed to load chat lorebook:`, e);
+            console.warn(`${LOG_PREFIX} Failed to load chat-bound lorebook:`, e);
         }
+    } else {
+        console.log(`${LOG_PREFIX} No chat-bound lorebook found. chatMetadata:`, chatMetadata, 'METADATA_KEY:', METADATA_KEY);
     }
 
-    // Try character lorebook
+    // Try character lorebook as fallback
     const charId = context.characterId;
     if (charId !== undefined && context.characters?.[charId]) {
         const charName = context.characters[charId].name;
@@ -192,6 +200,7 @@ async function getOrCreateChatLorebook() {
             try {
                 const data = await loadWorldInfo(charLorebook);
                 if (data) {
+                    console.log(`${LOG_PREFIX} Using character lorebook: ${charLorebook}`);
                     return { name: charLorebook, data };
                 }
             } catch (e) {
@@ -200,7 +209,7 @@ async function getOrCreateChatLorebook() {
         }
     }
 
-    console.warn(`${LOG_PREFIX} No suitable lorebook found`);
+    console.warn(`${LOG_PREFIX} No suitable lorebook found. Please bind a lorebook to this chat.`);
     return null;
 }
 
@@ -810,6 +819,7 @@ async function init() {
             loadWorldInfo = worldInfoModule.loadWorldInfo;
             saveWorldInfo = worldInfoModule.saveWorldInfo;
             reloadEditor = worldInfoModule.reloadEditor;
+            METADATA_KEY = worldInfoModule.METADATA_KEY;
         } catch (e) {
             console.error(`${LOG_PREFIX} Failed to import world-info.js:`, e);
             return;
