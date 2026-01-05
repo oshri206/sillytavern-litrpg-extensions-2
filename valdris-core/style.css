@@ -1,0 +1,336 @@
+/**
+ * Valdris Core - Styles
+ *
+ * Minimal styling for the core module.
+ * Follows the glassmorphic dark theme from VMT.
+ */
+
+/* ============================================================================
+   CSS Custom Properties (Shared with other Valdris extensions)
+   ============================================================================ */
+
+:root {
+    /* Core colors */
+    --valdris-primary: #8c46ff;
+    --valdris-primary-hover: #a066ff;
+    --valdris-primary-dark: #6b35cc;
+
+    /* Status colors */
+    --valdris-success: #55cc77;
+    --valdris-warning: #ddaa33;
+    --valdris-danger: #e05555;
+    --valdris-info: #5588ee;
+
+    /* Vitals (inherited from VMT) */
+    --valdris-hp: #e05555;
+    --valdris-mp: #5588ee;
+    --valdris-stamina: #55cc77;
+    --valdris-xp: #ddaa33;
+
+    /* Backgrounds */
+    --valdris-bg-dark: rgba(20, 20, 25, 0.95);
+    --valdris-bg-medium: rgba(30, 30, 38, 0.9);
+    --valdris-bg-light: rgba(45, 45, 55, 0.8);
+    --valdris-bg-hover: rgba(60, 60, 75, 0.7);
+
+    /* Text */
+    --valdris-text-primary: #e8e8e8;
+    --valdris-text-secondary: #a0a0a0;
+    --valdris-text-muted: #666;
+
+    /* Borders */
+    --valdris-border: rgba(100, 100, 120, 0.3);
+    --valdris-border-hover: rgba(140, 70, 255, 0.5);
+
+    /* Shadows */
+    --valdris-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --valdris-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --valdris-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --valdris-glow: 0 0 20px rgba(140, 70, 255, 0.3);
+
+    /* Spacing */
+    --valdris-space-xs: 4px;
+    --valdris-space-sm: 8px;
+    --valdris-space-md: 12px;
+    --valdris-space-lg: 16px;
+    --valdris-space-xl: 24px;
+
+    /* Border radius */
+    --valdris-radius-sm: 4px;
+    --valdris-radius-md: 8px;
+    --valdris-radius-lg: 12px;
+
+    /* Transitions */
+    --valdris-transition-fast: 150ms ease;
+    --valdris-transition-normal: 250ms ease;
+}
+
+/* ============================================================================
+   Status Indicator
+   ============================================================================ */
+
+.valdris-core-status {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 999998;
+
+    display: flex;
+    align-items: center;
+    gap: var(--valdris-space-sm);
+
+    padding: var(--valdris-space-sm) var(--valdris-space-md);
+    background: var(--valdris-bg-dark);
+    border: 1px solid var(--valdris-border);
+    border-radius: var(--valdris-radius-md);
+    box-shadow: var(--valdris-shadow-md);
+
+    cursor: pointer;
+    user-select: none;
+    transition: all var(--valdris-transition-normal);
+}
+
+.valdris-core-status:hover {
+    border-color: var(--valdris-border-hover);
+    box-shadow: var(--valdris-shadow-md), var(--valdris-glow);
+    transform: translateY(-2px);
+}
+
+.valdris-core-status__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--valdris-primary);
+    animation: valdris-pulse 2s infinite;
+}
+
+.valdris-core-status__domains {
+    font-size: 12px;
+    color: var(--valdris-text-secondary);
+}
+
+@keyframes valdris-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* ============================================================================
+   Debug Panel
+   ============================================================================ */
+
+.valdris-core-debug-panel {
+    position: fixed;
+    bottom: 70px;
+    left: 20px;
+    z-index: 999999;
+
+    width: 400px;
+    max-height: 500px;
+
+    background: var(--valdris-bg-dark);
+    border: 1px solid var(--valdris-border);
+    border-radius: var(--valdris-radius-lg);
+    box-shadow: var(--valdris-shadow-lg);
+
+    overflow: hidden;
+    animation: valdris-slide-up 200ms ease-out;
+}
+
+@keyframes valdris-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.valdris-core-debug-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: var(--valdris-space-md) var(--valdris-space-lg);
+    background: var(--valdris-bg-medium);
+    border-bottom: 1px solid var(--valdris-border);
+}
+
+.valdris-core-debug-panel__header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--valdris-text-primary);
+}
+
+.valdris-core-debug-panel__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+    padding: 0;
+
+    background: transparent;
+    border: none;
+    border-radius: var(--valdris-radius-sm);
+
+    font-size: 18px;
+    color: var(--valdris-text-secondary);
+    cursor: pointer;
+    transition: all var(--valdris-transition-fast);
+}
+
+.valdris-core-debug-panel__close:hover {
+    background: var(--valdris-bg-hover);
+    color: var(--valdris-text-primary);
+}
+
+.valdris-core-debug-panel__content {
+    max-height: 400px;
+    padding: var(--valdris-space-md);
+    overflow-y: auto;
+}
+
+.valdris-core-debug-section {
+    margin-bottom: var(--valdris-space-lg);
+}
+
+.valdris-core-debug-section:last-child {
+    margin-bottom: 0;
+}
+
+.valdris-core-debug-section h4 {
+    margin: 0 0 var(--valdris-space-sm) 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--valdris-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.valdris-core-debug-section pre {
+    margin: 0;
+    padding: var(--valdris-space-sm);
+    background: var(--valdris-bg-light);
+    border-radius: var(--valdris-radius-sm);
+
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--valdris-text-secondary);
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-x: auto;
+}
+
+.valdris-core-debug-context {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+/* ============================================================================
+   Scrollbar Styling
+   ============================================================================ */
+
+.valdris-core-debug-panel__content::-webkit-scrollbar,
+.valdris-core-debug-context::-webkit-scrollbar {
+    width: 6px;
+}
+
+.valdris-core-debug-panel__content::-webkit-scrollbar-track,
+.valdris-core-debug-context::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.valdris-core-debug-panel__content::-webkit-scrollbar-thumb,
+.valdris-core-debug-context::-webkit-scrollbar-thumb {
+    background: var(--valdris-border);
+    border-radius: 3px;
+}
+
+.valdris-core-debug-panel__content::-webkit-scrollbar-thumb:hover,
+.valdris-core-debug-context::-webkit-scrollbar-thumb:hover {
+    background: var(--valdris-primary-dark);
+}
+
+/* ============================================================================
+   Utility Classes (Shared with other Valdris extensions)
+   ============================================================================ */
+
+.valdris-hidden {
+    display: none !important;
+}
+
+.valdris-flex {
+    display: flex;
+}
+
+.valdris-flex-col {
+    flex-direction: column;
+}
+
+.valdris-items-center {
+    align-items: center;
+}
+
+.valdris-justify-between {
+    justify-content: space-between;
+}
+
+.valdris-gap-sm {
+    gap: var(--valdris-space-sm);
+}
+
+.valdris-gap-md {
+    gap: var(--valdris-space-md);
+}
+
+.valdris-text-success {
+    color: var(--valdris-success) !important;
+}
+
+.valdris-text-warning {
+    color: var(--valdris-warning) !important;
+}
+
+.valdris-text-danger {
+    color: var(--valdris-danger) !important;
+}
+
+.valdris-text-info {
+    color: var(--valdris-info) !important;
+}
+
+.valdris-text-muted {
+    color: var(--valdris-text-muted) !important;
+}
+
+/* ============================================================================
+   Responsive Adjustments
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .valdris-core-status {
+        bottom: 10px;
+        left: 10px;
+        padding: var(--valdris-space-xs) var(--valdris-space-sm);
+    }
+
+    .valdris-core-status__domains {
+        display: none;
+    }
+
+    .valdris-core-debug-panel {
+        left: 10px;
+        right: 10px;
+        width: auto;
+        bottom: 60px;
+    }
+}
