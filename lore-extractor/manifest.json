@@ -1,0 +1,13 @@
+{
+    "display_name": "Lore Extractor",
+    "loading_order": 100,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "LiteRPG Extensions",
+    "version": "1.0.0",
+    "description": "Automatically extracts lore (NPCs, locations, items, events, factions, relationships, abilities) from roleplay messages and creates lorebook entries.",
+    "auto_update": false,
+    "minimum_client_version": "1.12.0"
+}
