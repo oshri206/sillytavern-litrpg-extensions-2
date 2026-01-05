@@ -1,0 +1,571 @@
+/**
+ * Valdris NPC Social - Styles
+ */
+
+/* Launcher */
+.vns_launcher {
+    position: fixed;
+    right: 20px;
+    bottom: 80px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--valdris-primary, #6366f1);
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 999;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.vns_launcher:hover {
+    transform: scale(1.1);
+    background: var(--valdris-primary-hover, #5558e3);
+}
+
+/* Container */
+.vns_container {
+    position: fixed;
+    right: 20px;
+    bottom: 140px;
+    width: 420px;
+    max-height: 70vh;
+    font-family: var(--valdris-font, system-ui, -apple-system, sans-serif);
+    font-size: 13px;
+    z-index: 1000;
+}
+
+.vns_container.vns_hidden {
+    display: none;
+}
+
+/* Panel */
+.vns_panel {
+    background: var(--valdris-bg, #1a1a2e);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+}
+
+.vns_panel_header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border-bottom: 1px solid var(--valdris-border, #3a3a4a);
+}
+
+.vns_panel_header h2 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--valdris-text, #e2e2e9);
+    flex: 1;
+}
+
+.vns_npc_count {
+    font-size: 12px;
+    color: var(--valdris-text-muted, #9999aa);
+    background: var(--valdris-bg, #1a1a2e);
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.vns_panel_body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+/* Toolbar */
+.vns_toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.vns_search {
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 6px;
+    color: var(--valdris-text, #e2e2e9);
+    font-size: 13px;
+}
+
+.vns_search:focus {
+    outline: none;
+    border-color: var(--valdris-primary, #6366f1);
+}
+
+.vns_filter_select {
+    padding: 8px 12px;
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 6px;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+/* NPC List */
+.vns_npc_list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vns_npc_card {
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.vns_npc_card:hover {
+    border-color: var(--valdris-primary, #6366f1);
+    transform: translateX(4px);
+}
+
+.vns_npc_card.vns_dead {
+    opacity: 0.5;
+}
+
+.vns_npc_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+}
+
+.vns_npc_name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.vns_npc_name span:first-child {
+    font-weight: 600;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.vns_npc_title {
+    font-size: 11px;
+    color: var(--valdris-text-muted, #9999aa);
+}
+
+.vns_npc_relation_badge {
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+}
+
+.vns_npc_info {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--valdris-text-muted, #9999aa);
+    margin-bottom: 8px;
+}
+
+.vns_npc_role {
+    background: var(--valdris-bg, #1a1a2e);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.vns_relation_bar_container {
+    height: 4px;
+    background: var(--valdris-bg, #1a1a2e);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.vns_relation_bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* Detail View */
+.vns_detail_view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.vns_detail_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vns_btn_back {
+    background: transparent;
+    border: none;
+    color: var(--valdris-primary, #6366f1);
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.vns_detail_actions {
+    display: flex;
+    gap: 8px;
+}
+
+.vns_detail_main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.vns_detail_name_row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vns_detail_name_row h2 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.vns_deceased_badge {
+    font-size: 11px;
+    background: var(--valdris-danger, #ef4444);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.vns_detail_title {
+    color: var(--valdris-text-muted, #9999aa);
+    font-style: italic;
+}
+
+/* Stats Grid */
+.vns_stats_grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.vns_stat_block {
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.vns_stat_header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.vns_stat_label {
+    font-size: 11px;
+    color: var(--valdris-text-muted, #9999aa);
+    text-transform: uppercase;
+}
+
+.vns_stat_value {
+    font-weight: 600;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.vns_stat_bar_bg {
+    height: 6px;
+    background: var(--valdris-bg, #1a1a2e);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.vns_stat_bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* Detail Info */
+.vns_detail_info {
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.vns_info_row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.vns_info_row:last-child {
+    margin-bottom: 0;
+}
+
+.vns_info_label {
+    color: var(--valdris-text-muted, #9999aa);
+    min-width: 70px;
+}
+
+/* Section */
+.vns_section {
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.vns_section h3 {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+/* Event Buttons */
+.vns_event_buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.vns_btn_positive {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: #4CAF50;
+    color: #4CAF50;
+}
+
+.vns_btn_positive:hover {
+    background: rgba(76, 175, 80, 0.3);
+}
+
+.vns_btn_negative {
+    background: rgba(244, 67, 54, 0.2);
+    border-color: #F44336;
+    color: #F44336;
+}
+
+.vns_btn_negative:hover {
+    background: rgba(244, 67, 54, 0.3);
+}
+
+/* Notes */
+.vns_notes_area {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    background: var(--valdris-bg, #1a1a2e);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 6px;
+    color: var(--valdris-text, #e2e2e9);
+    resize: vertical;
+    font-family: inherit;
+}
+
+.vns_notes_area:focus {
+    outline: none;
+    border-color: var(--valdris-primary, #6366f1);
+}
+
+/* History */
+.vns_history_list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vns_history_item {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    padding: 6px;
+    background: var(--valdris-bg, #1a1a2e);
+    border-radius: 4px;
+}
+
+.vns_history_type {
+    color: var(--valdris-text-muted, #9999aa);
+}
+
+.vns_history_outcome {
+    flex: 1;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.vns_history_change {
+    font-weight: 600;
+}
+
+.vns_history_change.positive {
+    color: #4CAF50;
+}
+
+.vns_history_change.negative {
+    color: #F44336;
+}
+
+/* Buttons */
+.vns_btn {
+    padding: 8px 16px;
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 6px;
+    color: var(--valdris-text, #e2e2e9);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.vns_btn:hover {
+    background: var(--valdris-bg-hover, #3a3a4a);
+}
+
+.vns_btn_primary {
+    background: var(--valdris-primary, #6366f1);
+    border-color: var(--valdris-primary, #6366f1);
+    color: #fff;
+}
+
+.vns_btn_primary:hover {
+    background: var(--valdris-primary-hover, #5558e3);
+}
+
+.vns_btn_danger {
+    background: var(--valdris-danger, #ef4444);
+    border-color: var(--valdris-danger, #ef4444);
+    color: #fff;
+}
+
+.vns_btn_small {
+    padding: 4px 10px;
+}
+
+.vns_btn_icon {
+    padding: 4px 8px;
+    background: transparent;
+    border: none;
+    color: var(--valdris-text-muted, #9999aa);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.vns_btn_icon:hover {
+    color: var(--valdris-text, #e2e2e9);
+}
+
+/* Modal */
+.vns_modal_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.vns_modal {
+    background: var(--valdris-bg, #1a1a2e);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 12px;
+    min-width: 360px;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.vns_modal_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--valdris-border, #3a3a4a);
+}
+
+.vns_modal_header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--valdris-text, #e2e2e9);
+}
+
+.vns_modal_body {
+    padding: 16px;
+}
+
+.vns_modal_form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.vns_form_row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vns_form_row label {
+    font-size: 11px;
+    color: var(--valdris-text-muted, #9999aa);
+    text-transform: uppercase;
+}
+
+.vns_form_row_double {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.vns_input,
+.vns_select {
+    padding: 8px 10px;
+    background: var(--valdris-bg-secondary, #2a2a3a);
+    border: 1px solid var(--valdris-border, #3a3a4a);
+    border-radius: 6px;
+    color: var(--valdris-text, #e2e2e9);
+    font-size: 13px;
+}
+
+.vns_input:focus,
+.vns_select:focus {
+    outline: none;
+    border-color: var(--valdris-primary, #6366f1);
+}
+
+.vns_checkbox_label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    text-transform: none !important;
+    color: var(--valdris-text, #e2e2e9) !important;
+}
+
+.vns_modal_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--valdris-border, #3a3a4a);
+}
+
+/* Empty state */
+.vns_empty {
+    text-align: center;
+    padding: 32px;
+    color: var(--valdris-text-muted, #9999aa);
+    font-style: italic;
+}
