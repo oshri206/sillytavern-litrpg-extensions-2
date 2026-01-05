@@ -366,9 +366,41 @@ function normalizeRegex(pattern) {
 
 function getMessageContent(messageId) {
     const ctx = getContext?.();
-    const chat = ctx?.chat || ctx?.messages || [];
-    const message = chat.find(entry => entry.id === messageId || entry.index === messageId) || chat[messageId];
-    return message?.mes || message?.message || message?.content || '';
+    const chat = ctx?.chat || [];
+
+    console.log('[VMasterTracker] getMessageContent called with messageId:', messageId);
+    console.log('[VMasterTracker] Chat length:', chat.length);
+
+    // MESSAGE_RECEIVED passes the message index (0-based position in chat array)
+    // Get the message at that index, or if not valid, get the last message
+    let message = null;
+
+    if (typeof messageId === 'number' && messageId >= 0 && messageId < chat.length) {
+        message = chat[messageId];
+        console.log('[VMasterTracker] Found message at index:', messageId);
+    } else {
+        // Fallback: get the last message in the chat
+        message = chat[chat.length - 1];
+        console.log('[VMasterTracker] Using last message in chat');
+    }
+
+    if (!message) {
+        console.log('[VMasterTracker] No message found');
+        return { text: '', isUser: true };
+    }
+
+    console.log('[VMasterTracker] Message properties:', {
+        hasName: !!message.name,
+        hasMes: !!message.mes,
+        is_user: message.is_user,
+        mesLength: message.mes?.length || 0
+    });
+
+    // Return both the text and whether it's a user message
+    return {
+        text: message.mes || message.message || message.content || '',
+        isUser: message.is_user === true
+    };
 }
 
 async function recordParseHistory(summary, message, applied) {
@@ -458,11 +490,18 @@ async function applyStatusGains(statuses) {
 }
 
 async function parseMessageForChanges(text) {
+    console.log('[VMasterTracker] parseMessageForChanges called');
+
     const state = getState();
     const autoParsing = state.settings?.autoParsing;
-    if (!autoParsing?.enabled || !text) return;
+    if (!autoParsing?.enabled || !text) {
+        console.log('[VMasterTracker] Parsing skipped - enabled:', autoParsing?.enabled, 'hasText:', !!text);
+        return;
+    }
 
     const categories = autoParsing.parseCategories || {};
+    console.log('[VMasterTracker] Parse categories:', Object.keys(categories).filter(k => categories[k]));
+
     const changes = [];
 
     const patterns = {
@@ -640,9 +679,15 @@ async function parseMessageForChanges(text) {
         }
     });
 
-    if (!changes.length) return;
+    console.log('[VMasterTracker] Found', changes.length, 'changes to apply');
+
+    if (!changes.length) {
+        console.log('[VMasterTracker] No pattern matches found in message');
+        return;
+    }
 
     const summary = changes.map(change => change.summary).join(' | ');
+    console.log('[VMasterTracker] Changes summary:', summary);
     const applyAll = async () => {
         const undoStack = [];
         for (const change of changes) {
@@ -3676,10 +3721,31 @@ function registerEvents() {
     });
 
     eventSource.on(event_types.MESSAGE_RECEIVED, async (messageId) => {
+        console.log('[VMasterTracker] MESSAGE_RECEIVED event fired with:', messageId);
+
         const state = getState();
-        if (!state.settings?.autoParsing?.enabled) return;
-        const message = getMessageContent(messageId);
-        await parseMessageForChanges(message);
+        if (!state.settings?.autoParsing?.enabled) {
+            console.log('[VMasterTracker] Auto-parsing is disabled, skipping');
+            return;
+        }
+
+        const messageData = getMessageContent(messageId);
+
+        // Only parse AI/assistant messages, not user messages
+        if (messageData.isUser) {
+            console.log('[VMasterTracker] Skipping user message');
+            return;
+        }
+
+        if (!messageData.text) {
+            console.log('[VMasterTracker] No message text found');
+            return;
+        }
+
+        console.log('[VMasterTracker] Parsing AI message, length:', messageData.text.length);
+        console.log('[VMasterTracker] Message preview:', messageData.text.slice(0, 200));
+
+        await parseMessageForChanges(messageData.text);
     });
 
     console.log('[VMasterTracker] Events registered');
