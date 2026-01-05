@@ -1,8 +1,8 @@
 {
     "display_name": "Valdris World State",
     "loading_order": 4,
-    "requires": ["valdris-core"],
-    "optional": ["valdris-time-celestial"],
+    "requires": [],
+    "optional": [],
     "js": "index.js",
     "css": "style.css",
     "author": "Valdris Suite",

@@ -1,7 +1,7 @@
 {
     "display_name": "Valdris Time & Celestial",
     "loading_order": 2,
-    "requires": ["valdris-core"],
+    "requires": [],
     "optional": [],
     "js": "index.js",
     "css": "style.css",

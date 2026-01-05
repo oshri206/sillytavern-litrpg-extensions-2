@@ -3791,7 +3791,7 @@ function initCoreIntegration() {
     _cleanup.unsubscribers.push(unsub);
 
     // Subscribe to core events
-    const eventUnsub = ValdrisCore.ValdrisEventBus.subscribe('newDay', (data) => {
+    const eventUnsub = ValdrisCore.ValdrisEventBus.on('newDay', (data) => {
         console.log('[VMasterTracker] New day event received:', data);
 
         // Process wound healing
@@ -3806,7 +3806,7 @@ function initCoreIntegration() {
     _cleanup.unsubscribers.push(eventUnsub);
 
     // Subscribe to time advanced events (for training progress, etc.)
-    const timeUnsub = ValdrisCore.ValdrisEventBus.subscribe('timeAdvanced', (data) => {
+    const timeUnsub = ValdrisCore.ValdrisEventBus.on('timeAdvanced', (data) => {
         // Training sessions could advance here if needed
         console.log('[VMasterTracker] Time advanced:', data.hoursAdvanced, 'hours');
     });

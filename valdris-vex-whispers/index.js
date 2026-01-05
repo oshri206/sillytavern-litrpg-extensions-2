@@ -187,7 +187,7 @@ function render() {
             }),
             ' Auto-generate hints'
         ),
-        h('button', { class: 'vvw_btn vvw_btn_small', onclick: refreshHints }, ' Refresh')
+        h('button', { class: 'vvw_btn vvw_btn_small', onclick: refreshHints }, '🔄 Refresh')
     ));
 
     // Vex avatar and message
@@ -288,12 +288,14 @@ function initCoreIntegration() {
     if (!ValdrisCore) return;
 
     // Subscribe to domain changes to refresh hints
-    ValdrisCore.ValdrisEventBus.subscribe('domainChanged', () => {
+    // FIXED: Changed from .subscribe() to .on()
+    ValdrisCore.ValdrisEventBus.on('domainChanged', () => {
         setTimeout(refreshHints, 100);
     });
 
     // Subscribe to time events
-    ValdrisCore.ValdrisEventBus.subscribe('newDay', () => {
+    // FIXED: Changed from .subscribe() to .on()
+    ValdrisCore.ValdrisEventBus.on('newDay', () => {
         // Clear expired hints
         state.hints = state.hints.filter(h => !h.expires || new Date(h.expires) > new Date());
         saveState();

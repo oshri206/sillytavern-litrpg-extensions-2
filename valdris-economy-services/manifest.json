@@ -1,8 +1,8 @@
 {
     "display_name": "Valdris Economy Services",
     "loading_order": 6,
-    "requires": ["valdris-core"],
-    "optional": ["valdris-world-state", "valdris-npc-social"],
+    "requires": [],
+    "optional": [],
     "js": "index.js",
     "css": "style.css",
     "author": "Valdris Suite",

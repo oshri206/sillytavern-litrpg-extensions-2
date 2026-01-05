@@ -1,8 +1,8 @@
 {
     "display_name": "Valdris Factions & Politics",
     "loading_order": 7,
-    "requires": ["valdris-core"],
-    "optional": ["valdris-world-state", "valdris-npc-social"],
+    "requires": [],
+    "optional": [],
     "js": "index.js",
     "css": "style.css",
     "author": "Valdris Suite",

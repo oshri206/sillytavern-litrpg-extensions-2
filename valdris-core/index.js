@@ -15,10 +15,6 @@
  * } from '../valdris-core/index.js';
  */
 
-// Import SillyTavern modules
-import { getContext, extension_settings, saveSettingsDebounced } from '../../../extensions.js';
-import { eventSource, event_types } from '../../../../script.js';
-
 // Import core modules
 import { ValdrisEventBus } from './event-bus.js';
 import {
@@ -46,6 +42,16 @@ import {
     buildDomainContext,
     getDefaultSettings as getContextSettings
 } from './context-builder.js';
+
+// ============================================================================
+// SillyTavern Module References (populated by init)
+// ============================================================================
+
+let extension_settings = {};
+let getContext = null;
+let saveSettingsDebounced = () => {};
+let eventSource = null;
+let event_types = {};
 
 // ============================================================================
 // Constants
@@ -390,6 +396,26 @@ async function init() {
     console.log(`${LOG_PREFIX} Initializing Valdris Core v1.0.0`);
 
     try {
+        // Dynamic import of SillyTavern modules
+        try {
+            const extModule = await import('../../../extensions.js');
+            extension_settings = extModule.extension_settings;
+            getContext = extModule.getContext;
+            saveSettingsDebounced = extModule.saveSettingsDebounced;
+        } catch (e) {
+            console.error(`${LOG_PREFIX} Failed to import extensions.js`, e);
+            return;
+        }
+
+        try {
+            const scriptModule = await import('../../../../script.js');
+            eventSource = scriptModule.eventSource;
+            event_types = scriptModule.event_types;
+        } catch (e) {
+            console.error(`${LOG_PREFIX} Failed to import script.js`, e);
+            return;
+        }
+
         // Initialize settings
         if (!extension_settings[EXTENSION_NAME]) {
             extension_settings[EXTENSION_NAME] = { ...DEFAULT_SETTINGS };
@@ -513,3 +539,19 @@ export default {
     setDomainState,
     buildFullContext
 };
+
+// Expose to window for other extensions that can't use ES imports
+window.ValdrisCore = {
+    ValdrisEventBus,
+    registerDomain,
+    unregisterDomain,
+    getDomainState,
+    setDomainState,
+    updateDomainState,
+    getFullState,
+    subscribe,
+    buildFullContext,
+    generateId
+};
+
+console.log(`${LOG_PREFIX} Ready and exposed to window.ValdrisCore`);

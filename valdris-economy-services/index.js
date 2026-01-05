@@ -170,7 +170,7 @@ function renderWalletTab() {
             h('div', { class: 'ves_transaction_list' },
                 ...state.transactions.slice(0, 5).map(t =>
                     h('div', { class: `ves_transaction ${t.type}` },
-                        h('span', { class: 'ves_trans_type' }, t.type === 'purchase' ? '' : ''),
+                        h('span', { class: 'ves_trans_type' }, t.type === 'purchase' ? '📤' : '📥'),
                         h('span', { class: 'ves_trans_item' }, `${t.quantity}x ${t.item}`),
                         h('span', { class: 'ves_trans_price' }, formatCurrency(t.totalPrice))
                     )
@@ -204,7 +204,7 @@ function renderShopCard(shop) {
 
     return h('div', { class: 'ves_shop_card' },
         h('div', { class: 'ves_shop_header' },
-            h('span', { class: 'ves_shop_icon' }, type?.icon || ''),
+            h('span', { class: 'ves_shop_icon' }, type?.icon || '🏪'),
             h('div', { class: 'ves_shop_info' },
                 h('span', { class: 'ves_shop_name' }, shop.name),
                 h('span', { class: 'ves_shop_type' }, type?.name || shop.type)
@@ -218,7 +218,7 @@ function renderShopCard(shop) {
                 }
             }, '×')
         ),
-        shop.location ? h('div', { class: 'ves_shop_location' }, ` ${shop.location}`) : null,
+        shop.location ? h('div', { class: 'ves_shop_location' }, `📍 ${shop.location}`) : null,
         h('div', { class: 'ves_shop_meta' },
             shop.inventory.length > 0 ? h('span', {}, `${shop.inventory.length} items`) : null,
             shop.services?.length > 0 ? h('span', {}, `${shop.services.length} services`) : null,
@@ -350,7 +350,7 @@ function mountUI() {
     UI.container = h('div', { class: 'ves_container ves_hidden' },
         h('div', { class: 'ves_panel' },
             h('div', { class: 'ves_panel_header' },
-                h('h2', {}, ' Economy'),
+                h('h2', {}, '💰 Economy'),
                 h('button', { class: 'ves_btn_icon', onclick: () => { UI.visible = false; UI.container.classList.add('ves_hidden'); } }, '×')
             ),
             h('div', { class: 'ves_tabs' },
@@ -369,7 +369,7 @@ function mountUI() {
             UI.container.classList.toggle('ves_hidden', !UI.visible);
             if (UI.visible) render();
         }
-    }, '');
+    }, '💰');
 
     document.body.appendChild(UI.container);
     document.body.appendChild(launcher);
@@ -394,7 +394,8 @@ function initCoreIntegration() {
     ValdrisCore.registerDomain('economy', EXT_NAME);
     saveState();
 
-    ValdrisCore.ValdrisEventBus.subscribe('newDay', () => {
+    // FIXED: Changed from .subscribe() to .on()
+    ValdrisCore.ValdrisEventBus.on('newDay', () => {
         const updates = updateMarketPrices(state, {});
         if (updates.length > 0) {
             console.log('[VEconomy] Market updates:', updates);

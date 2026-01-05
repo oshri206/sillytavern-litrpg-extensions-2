@@ -766,7 +766,7 @@ function initCoreIntegration() {
     saveState();
 
     // Subscribe to new day events
-    ValdrisCore.ValdrisEventBus.subscribe('newDay', (data) => {
+    ValdrisCore.ValdrisEventBus.on('newDay', (data) => {
         console.log('[VWorldState] New day:', data);
 
         // Process daily environment changes

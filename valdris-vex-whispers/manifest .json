@@ -1,0 +1,11 @@
+{
+    "display_name": "Valdris Vex Whispers",
+    "loading_order": 8,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Valdris Suite",
+    "version": "1.0.0",
+    "description": "Vex the system companion - hints, reminders, and cross-extension context"
+}
