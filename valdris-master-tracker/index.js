@@ -48,7 +48,18 @@ import { renderDungeonsTab } from './tabs/dungeons.js';
 import { renderTalentsTab } from './tabs/talents.js';
 import { renderLoadoutsTab } from './tabs/loadouts.js';
 import { renderSettingsTab } from './tabs/settings.js';
+import { renderWoundsTab, processWoundHealing } from './tabs/wounds.js';
+import { renderTrainingTab } from './tabs/training.js';
+import { processCompanionNeeds } from './tabs/companions.js';
 import { buildContextBlock } from './context-utils.js';
+
+// Valdris Core integration (optional - degrades gracefully if not present)
+let ValdrisCore = null;
+try {
+    ValdrisCore = await import('../valdris-core/index.js');
+} catch (e) {
+    console.log('[VMasterTracker] Valdris Core not available, running standalone');
+}
 
 // SillyTavern module references
 let extension_settings, getContext, saveSettingsDebounced;
@@ -100,6 +111,8 @@ const TABS = [
     { key: 'inventory', label: 'Inventory', icon: '' },
     { key: 'reputation', label: 'Reputation', icon: '' },
     { key: 'companions', label: 'Companions', icon: '' },
+    { key: 'wounds', label: 'Wounds', icon: '' },
+    { key: 'training', label: 'Training', icon: '' },
     { key: 'achievements', label: 'Achievements', icon: '' },
     { key: 'affinities', label: 'Affinities', icon: '' },
     { key: 'contracts', label: 'Contracts', icon: '' },
@@ -3574,6 +3587,12 @@ function render() {
         case 'companions':
             body.appendChild(renderCompanionsTab(openModal, render));
             break;
+        case 'wounds':
+            body.appendChild(renderWoundsTab(openModal, render));
+            break;
+        case 'training':
+            body.appendChild(renderTrainingTab(openModal, render));
+            break;
         case 'achievements':
             body.appendChild(renderAchievementsTab(openModal, render));
             break;
@@ -3731,6 +3750,72 @@ window.VMasterTracker = {
 };
 
 /**
+ * Integrate with Valdris Core (if available)
+ */
+function initCoreIntegration() {
+    if (!ValdrisCore) {
+        console.log('[VMasterTracker] Running standalone (no core integration)');
+        return;
+    }
+
+    console.log('[VMasterTracker] Integrating with Valdris Core...');
+
+    // Register as owner of 'player' domain
+    ValdrisCore.registerDomain('player', EXT_NAME);
+
+    // Sync current state to core
+    const syncToCore = () => {
+        const state = getState();
+        ValdrisCore.setDomainState('player', {
+            name: state.name,
+            level: state.level,
+            class: state.class,
+            hp: state.hp,
+            mp: state.mp,
+            stamina: state.stamina,
+            stats: state.stats,
+            skills: state.skills,
+            equipment: state.equipment,
+            wounds: state.wounds,
+            companions: state.companions,
+            gold: state.gold,
+            location: state.location
+        });
+    };
+
+    // Initial sync
+    syncToCore();
+
+    // Re-sync on state changes
+    const unsub = subscribe(() => syncToCore());
+    _cleanup.unsubscribers.push(unsub);
+
+    // Subscribe to core events
+    const eventUnsub = ValdrisCore.ValdrisEventBus.subscribe('newDay', (data) => {
+        console.log('[VMasterTracker] New day event received:', data);
+
+        // Process wound healing
+        processWoundHealing(render);
+
+        // Process companion needs decay
+        processCompanionNeeds(render);
+
+        // Re-sync state after processing
+        syncToCore();
+    });
+    _cleanup.unsubscribers.push(eventUnsub);
+
+    // Subscribe to time advanced events (for training progress, etc.)
+    const timeUnsub = ValdrisCore.ValdrisEventBus.subscribe('timeAdvanced', (data) => {
+        // Training sessions could advance here if needed
+        console.log('[VMasterTracker] Time advanced:', data.hoursAdvanced, 'hours');
+    });
+    _cleanup.unsubscribers.push(timeUnsub);
+
+    console.log('[VMasterTracker] Core integration complete');
+}
+
+/**
  * Main initialization
  */
 (async function main() {
@@ -3746,6 +3831,9 @@ window.VMasterTracker = {
         // Subscribe to state changes for re-render
         const unsub = subscribe(() => render());
         _cleanup.unsubscribers.push(unsub);
+
+        // Integrate with Valdris Core (if available)
+        initCoreIntegration();
 
         console.log('[VMasterTracker] Ready!');
     } catch (e) {
