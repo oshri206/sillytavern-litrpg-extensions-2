@@ -3846,7 +3846,7 @@ function initCoreIntegration() {
             companions: state.companions,
             gold: state.gold,
             location: state.location
-        });
+        }, EXT_NAME);
     };
 
     // Initial sync

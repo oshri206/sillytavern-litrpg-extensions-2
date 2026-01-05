@@ -191,7 +191,12 @@ export function renderSettingsTab(openModal, render) {
             ),
             h('div', { class: 'vmt_section_body' },
                 h('div', { class: 'vmt_toggle_grid' },
-                    createToggle('Enabled', autoParsing.enabled, (value) => updateField('settings.autoParsing.enabled', value)),
+                    createToggle('Enabled', autoParsing.enabled, async (value) => {
+                        console.log('[VMasterTracker] Toggle clicked, setting autoParsing.enabled to:', value);
+                        await updateField('settings.autoParsing.enabled', value);
+                        const newState = getState();
+                        console.log('[VMasterTracker] After save, state shows:', newState.settings?.autoParsing?.enabled);
+                    }),
                     createToggle('Auto Apply', autoParsing.autoApply, (value) => updateField('settings.autoParsing.autoApply', value)),
                     createToggle('Show Toasts', autoParsing.showToasts, (value) => updateField('settings.autoParsing.showToasts', value))
                 ),
