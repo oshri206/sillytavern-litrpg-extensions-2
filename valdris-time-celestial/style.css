@@ -1,0 +1,740 @@
+/**
+ * Valdris Time & Celestial (VTC) - Styles
+ *
+ * Uses CSS variables from valdris-core for consistency.
+ */
+
+/* ============================================================================
+   Header Bar
+   ============================================================================ */
+
+.vtc-header {
+    position: relative;
+    z-index: 100;
+
+    background: linear-gradient(
+        180deg,
+        rgba(20, 20, 30, 0.95) 0%,
+        rgba(25, 25, 35, 0.9) 100%
+    );
+    border-bottom: 1px solid var(--valdris-border, rgba(100, 100, 120, 0.3));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--valdris-text-primary, #e8e8e8);
+
+    cursor: pointer;
+    user-select: none;
+}
+
+.vtc-header__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    gap: 16px;
+}
+
+.vtc-header__left,
+.vtc-header__center,
+.vtc-header__right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vtc-header__left {
+    flex: 1;
+}
+
+.vtc-header__center {
+    flex: 0 0 auto;
+}
+
+.vtc-header__right {
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.vtc-header__icon {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.vtc-header__separator {
+    color: var(--valdris-text-muted, #666);
+    opacity: 0.5;
+}
+
+.vtc-header__location-text,
+.vtc-header__date-text {
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+.vtc-header__time-text {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--valdris-primary, #8c46ff);
+}
+
+.vtc-header__period {
+    font-size: 11px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+    margin-left: 4px;
+}
+
+.vtc-header__weather-icon {
+    font-size: 16px;
+}
+
+.vtc-header__weather-text {
+    font-size: 12px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+.vtc-header__moons {
+    display: flex;
+    gap: 4px;
+}
+
+.vtc-header__moon {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+}
+
+.vtc-header__moon:hover {
+    transform: scale(1.2);
+}
+
+.vtc-header__moon--lunara {
+    filter: drop-shadow(0 0 3px rgba(192, 192, 192, 0.5));
+}
+
+.vtc-header__moon--veil {
+    filter: drop-shadow(0 0 3px rgba(74, 58, 106, 0.5));
+}
+
+/* Alerts */
+.vtc-header__alerts {
+    display: none;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 16px;
+    border-top: 1px solid var(--valdris-border, rgba(100, 100, 120, 0.2));
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.vtc-alert {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    background: rgba(60, 60, 80, 0.5);
+}
+
+.vtc-alert--celestial {
+    background: rgba(140, 70, 255, 0.2);
+    border: 1px solid rgba(140, 70, 255, 0.3);
+}
+
+.vtc-alert--festival {
+    background: rgba(221, 170, 51, 0.2);
+    border: 1px solid rgba(221, 170, 51, 0.3);
+}
+
+.vtc-alert--warning {
+    background: rgba(224, 85, 85, 0.2);
+    border: 1px solid rgba(224, 85, 85, 0.3);
+}
+
+.vtc-alert--buff {
+    background: rgba(85, 204, 119, 0.2);
+    border: 1px solid rgba(85, 204, 119, 0.3);
+}
+
+.vtc-alert__icon {
+    font-size: 12px;
+}
+
+.vtc-alert__text {
+    color: var(--valdris-text-primary, #e8e8e8);
+}
+
+/* ============================================================================
+   Control Panel
+   ============================================================================ */
+
+.vtc-panel {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 999998;
+
+    width: 380px;
+    max-height: calc(100vh - 120px);
+
+    background: var(--valdris-bg-dark, rgba(20, 20, 25, 0.95));
+    border: 1px solid var(--valdris-border, rgba(100, 100, 120, 0.3));
+    border-radius: var(--valdris-radius-lg, 12px);
+    box-shadow: var(--valdris-shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.5));
+
+    overflow: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.vtc-panel--hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+}
+
+.vtc-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--valdris-bg-medium, rgba(30, 30, 38, 0.9));
+    border-bottom: 1px solid var(--valdris-border, rgba(100, 100, 120, 0.3));
+}
+
+.vtc-panel__header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--valdris-text-primary, #e8e8e8);
+}
+
+.vtc-panel__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    font-size: 18px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.vtc-panel__close:hover {
+    background: var(--valdris-bg-hover, rgba(60, 60, 75, 0.7));
+    color: var(--valdris-text-primary, #e8e8e8);
+}
+
+.vtc-panel__content {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* Tabs */
+.vtc-panel__tabs {
+    display: flex;
+    border-bottom: 1px solid var(--valdris-border, rgba(100, 100, 120, 0.3));
+    background: var(--valdris-bg-medium, rgba(30, 30, 38, 0.9));
+}
+
+.vtc-panel__tab {
+    flex: 1;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--valdris-text-secondary, #a0a0a0);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.vtc-panel__tab:hover {
+    color: var(--valdris-text-primary, #e8e8e8);
+    background: var(--valdris-bg-hover, rgba(60, 60, 75, 0.5));
+}
+
+.vtc-panel__tab--active {
+    color: var(--valdris-primary, #8c46ff);
+    border-bottom-color: var(--valdris-primary, #8c46ff);
+}
+
+.vtc-panel__tab-content {
+    padding: 16px;
+}
+
+/* ============================================================================
+   Sections
+   ============================================================================ */
+
+.vtc-section {
+    margin-bottom: 20px;
+}
+
+.vtc-section:last-child {
+    margin-bottom: 0;
+}
+
+.vtc-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--valdris-primary, #8c46ff);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================================================
+   Time Display
+   ============================================================================ */
+
+.vtc-time-display {
+    text-align: center;
+    padding: 20px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border-radius: var(--valdris-radius-md, 8px);
+}
+
+.vtc-time-display__date {
+    font-size: 13px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+    margin-bottom: 4px;
+}
+
+.vtc-time-display__time {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--valdris-primary, #8c46ff);
+    text-shadow: 0 0 20px rgba(140, 70, 255, 0.3);
+}
+
+.vtc-time-display__period {
+    font-size: 14px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+    margin-top: 4px;
+}
+
+/* Time Controls */
+.vtc-time-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vtc-time-set {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vtc-time-set__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vtc-time-set__row label {
+    flex: 0 0 60px;
+    font-size: 12px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+.vtc-time-set__row input,
+.vtc-time-set__row select {
+    flex: 1;
+}
+
+.vtc-sun-times {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border-radius: var(--valdris-radius-md, 8px);
+    font-size: 13px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+/* ============================================================================
+   Weather Display
+   ============================================================================ */
+
+.vtc-weather-display {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border-radius: var(--valdris-radius-md, 8px);
+}
+
+.vtc-weather-display__icon {
+    font-size: 48px;
+}
+
+.vtc-weather-display__info {
+    flex: 1;
+}
+
+.vtc-weather-display__condition {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--valdris-text-primary, #e8e8e8);
+}
+
+.vtc-weather-display__temp,
+.vtc-weather-display__wind {
+    font-size: 13px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+.vtc-weather-display__desc {
+    margin-top: 10px;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--valdris-text-muted, #666);
+}
+
+.vtc-modifiers {
+    display: flex;
+    gap: 16px;
+    padding: 10px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border-radius: var(--valdris-radius-md, 8px);
+    font-size: 12px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+/* Forecast */
+.vtc-forecast {
+    display: flex;
+    gap: 8px;
+}
+
+.vtc-forecast__day {
+    flex: 1;
+    text-align: center;
+    padding: 10px 8px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border-radius: var(--valdris-radius-md, 8px);
+}
+
+.vtc-forecast__day-num {
+    font-size: 10px;
+    color: var(--valdris-text-muted, #666);
+    margin-bottom: 4px;
+}
+
+.vtc-forecast__icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.vtc-forecast__condition {
+    font-size: 10px;
+    color: var(--valdris-text-primary, #e8e8e8);
+}
+
+.vtc-forecast__temp {
+    font-size: 10px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+/* ============================================================================
+   Celestial
+   ============================================================================ */
+
+.vtc-moons {
+    display: flex;
+    gap: 16px;
+}
+
+.vtc-moon {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border-radius: var(--valdris-radius-md, 8px);
+}
+
+.vtc-moon__icon {
+    font-size: 36px;
+}
+
+.vtc-moon__icon--lunara {
+    filter: drop-shadow(0 0 8px rgba(192, 192, 192, 0.5));
+}
+
+.vtc-moon__icon--veil {
+    filter: drop-shadow(0 0 8px rgba(74, 58, 106, 0.5));
+}
+
+.vtc-moon__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--valdris-text-primary, #e8e8e8);
+}
+
+.vtc-moon__phase {
+    font-size: 12px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+.vtc-moon__until {
+    font-size: 10px;
+    color: var(--valdris-text-muted, #666);
+}
+
+.vtc-moonlight {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border-radius: var(--valdris-radius-sm, 4px);
+    font-size: 12px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+/* Events and Festivals */
+.vtc-events-list,
+.vtc-effects-list,
+.vtc-festivals-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.vtc-effects-list li {
+    padding: 6px 10px;
+    margin-bottom: 4px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border-radius: var(--valdris-radius-sm, 4px);
+    font-size: 12px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+.vtc-event {
+    padding: 10px;
+    margin-bottom: 8px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border-radius: var(--valdris-radius-md, 8px);
+    border-left: 3px solid var(--valdris-primary, #8c46ff);
+}
+
+.vtc-event--very_rare {
+    border-left-color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.vtc-event--rare {
+    border-left-color: #ffd93d;
+    background: rgba(255, 217, 61, 0.1);
+}
+
+.vtc-event__icon {
+    font-size: 16px;
+    margin-right: 8px;
+}
+
+.vtc-event__name {
+    font-weight: 600;
+    color: var(--valdris-text-primary, #e8e8e8);
+}
+
+.vtc-event__desc {
+    margin: 6px 0 0 0;
+    font-size: 11px;
+    color: var(--valdris-text-muted, #666);
+}
+
+.vtc-festival {
+    padding: 10px;
+    margin-bottom: 8px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border-radius: var(--valdris-radius-md, 8px);
+}
+
+.vtc-festival--today {
+    border: 1px solid var(--valdris-warning, #ddaa33);
+    background: rgba(221, 170, 51, 0.1);
+}
+
+.vtc-festival__name {
+    font-weight: 600;
+    color: var(--valdris-text-primary, #e8e8e8);
+}
+
+.vtc-festival__days {
+    float: right;
+    font-size: 11px;
+    color: var(--valdris-primary, #8c46ff);
+}
+
+.vtc-festival__desc {
+    margin: 6px 0 0 0;
+    font-size: 11px;
+    color: var(--valdris-text-muted, #666);
+}
+
+/* ============================================================================
+   Form Elements
+   ============================================================================ */
+
+.vtc-btn {
+    padding: 8px 14px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border: 1px solid var(--valdris-border, rgba(100, 100, 120, 0.3));
+    border-radius: var(--valdris-radius-sm, 4px);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--valdris-text-primary, #e8e8e8);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.vtc-btn:hover {
+    background: var(--valdris-bg-hover, rgba(60, 60, 75, 0.7));
+    border-color: var(--valdris-border-hover, rgba(140, 70, 255, 0.5));
+}
+
+.vtc-btn--primary {
+    background: var(--valdris-primary, #8c46ff);
+    border-color: var(--valdris-primary, #8c46ff);
+}
+
+.vtc-btn--primary:hover {
+    background: var(--valdris-primary-hover, #a066ff);
+    border-color: var(--valdris-primary-hover, #a066ff);
+}
+
+.vtc-select,
+.vtc-section input[type="number"],
+.vtc-section input[type="text"] {
+    padding: 8px 10px;
+    background: var(--valdris-bg-light, rgba(45, 45, 55, 0.8));
+    border: 1px solid var(--valdris-border, rgba(100, 100, 120, 0.3));
+    border-radius: var(--valdris-radius-sm, 4px);
+    font-size: 12px;
+    color: var(--valdris-text-primary, #e8e8e8);
+}
+
+.vtc-select:focus,
+.vtc-section input:focus {
+    outline: none;
+    border-color: var(--valdris-primary, #8c46ff);
+}
+
+.vtc-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+    cursor: pointer;
+}
+
+.vtc-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--valdris-primary, #8c46ff);
+}
+
+.vtc-setting-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.vtc-setting-row label {
+    flex: 1;
+    font-size: 12px;
+    color: var(--valdris-text-secondary, #a0a0a0);
+}
+
+.vtc-setting-row input {
+    width: 80px;
+}
+
+/* ============================================================================
+   Utilities
+   ============================================================================ */
+
+.vtc-hidden {
+    display: none !important;
+}
+
+.vtc-muted {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--valdris-text-muted, #666);
+}
+
+/* ============================================================================
+   Scrollbar
+   ============================================================================ */
+
+.vtc-panel__content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.vtc-panel__content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.vtc-panel__content::-webkit-scrollbar-thumb {
+    background: var(--valdris-border, rgba(100, 100, 120, 0.3));
+    border-radius: 3px;
+}
+
+.vtc-panel__content::-webkit-scrollbar-thumb:hover {
+    background: var(--valdris-primary-dark, #6b35cc);
+}
+
+/* ============================================================================
+   Responsive
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .vtc-header__content {
+        flex-wrap: wrap;
+        padding: 6px 12px;
+    }
+
+    .vtc-header__left,
+    .vtc-header__right {
+        flex: 1 1 50%;
+    }
+
+    .vtc-header__center {
+        flex: 1 1 100%;
+        justify-content: center;
+        order: -1;
+        margin-bottom: 4px;
+    }
+
+    .vtc-panel {
+        left: 10px;
+        right: 10px;
+        width: auto;
+    }
+
+    .vtc-moons {
+        flex-direction: column;
+    }
+
+    .vtc-forecast {
+        flex-wrap: wrap;
+    }
+
+    .vtc-forecast__day {
+        flex: 0 0 calc(33.33% - 6px);
+    }
+}
