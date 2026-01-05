@@ -17,7 +17,6 @@ let extension_settings = {};
 let saveSettingsDebounced = () => {};
 let eventSource = null;
 let event_types = {};
-let generateQuietPrompt = null;
 
 // World Info functions
 let createWorldInfoEntry = null;
@@ -300,10 +299,20 @@ async function extractLore(forceExtract = false) {
 
         console.log(`${LOG_PREFIX} Sending extraction request...`);
 
-        // Send to AI
+        // Send to AI - get generateQuietPrompt from SillyTavern context
         let response;
         try {
-            response = await generateQuietPrompt({ quietPrompt: prompt });
+            // Get the function from SillyTavern's global context
+            const stContext = SillyTavern?.getContext?.();
+            const generateFn = stContext?.generateQuietPrompt;
+
+            if (!generateFn) {
+                console.error(`${LOG_PREFIX} generateQuietPrompt not available in context`);
+                showNotification('Extraction failed: AI generation not available', 'error');
+                return;
+            }
+
+            response = await generateFn({ quietPrompt: prompt });
         } catch (e) {
             console.error(`${LOG_PREFIX} AI request failed:`, e);
             showNotification('Extraction failed: AI request error', 'error');
@@ -690,7 +699,6 @@ async function init() {
             const scriptModule = await import('../../../../script.js');
             eventSource = scriptModule.eventSource;
             event_types = scriptModule.event_types;
-            generateQuietPrompt = scriptModule.generateQuietPrompt;
             saveSettingsDebounced = scriptModule.saveSettingsDebounced;
         } catch (e) {
             console.error(`${LOG_PREFIX} Failed to import script.js:`, e);
