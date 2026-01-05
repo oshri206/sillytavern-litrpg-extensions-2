@@ -17,6 +17,7 @@ let extension_settings = {};
 let saveSettingsDebounced = () => {};
 let eventSource = null;
 let event_types = {};
+let generateQuietPrompt = null;
 
 // World Info functions
 let createWorldInfoEntry = null;
@@ -299,20 +300,22 @@ async function extractLore(forceExtract = false) {
 
         console.log(`${LOG_PREFIX} Sending extraction request...`);
 
-        // Send to AI - get generateQuietPrompt from SillyTavern context
+        // Send to AI using generateQuietPrompt (imported from script.js)
         let response;
         try {
-            // Get the function from SillyTavern's global context
-            const stContext = SillyTavern?.getContext?.();
-            const generateFn = stContext?.generateQuietPrompt;
-
-            if (!generateFn) {
-                console.error(`${LOG_PREFIX} generateQuietPrompt not available in context`);
+            if (!generateQuietPrompt) {
+                console.error(`${LOG_PREFIX} generateQuietPrompt not available`);
                 showNotification('Extraction failed: AI generation not available', 'error');
                 return;
             }
 
-            response = await generateFn({ quietPrompt: prompt });
+            // Call with object parameter format (matches memory extension pattern)
+            response = await generateQuietPrompt({
+                quietPrompt: prompt,
+                skipWIAN: true,  // Skip world info to avoid recursion
+            });
+
+            console.log(`${LOG_PREFIX} Raw response:`, response);
         } catch (e) {
             console.error(`${LOG_PREFIX} AI request failed:`, e);
             showNotification('Extraction failed: AI request error', 'error');
@@ -700,6 +703,7 @@ async function init() {
             eventSource = scriptModule.eventSource;
             event_types = scriptModule.event_types;
             saveSettingsDebounced = scriptModule.saveSettingsDebounced;
+            generateQuietPrompt = scriptModule.generateQuietPrompt;
         } catch (e) {
             console.error(`${LOG_PREFIX} Failed to import script.js:`, e);
             return;
