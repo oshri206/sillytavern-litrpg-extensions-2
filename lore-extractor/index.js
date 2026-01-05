@@ -17,7 +17,8 @@ let extension_settings = {};
 let saveSettingsDebounced = () => {};
 let eventSource = null;
 let event_types = {};
-let generateQuietPrompt = null;
+let getRequestHeaders = null;
+let oai_settings = null;
 
 // World Info functions
 let createWorldInfoEntry = null;
@@ -210,7 +211,7 @@ async function createLoreEntry(lorebook, extraction) {
     }
 
     try {
-        // Create the entry
+        // Create the entry (matches MemoryBooks pattern)
         const newEntry = createWorldInfoEntry(lorebook.name, lorebook.data);
 
         if (!newEntry) {
@@ -218,39 +219,53 @@ async function createLoreEntry(lorebook, extraction) {
             return null;
         }
 
-        // Populate the entry fields
+        // Populate the entry fields (matching MemoryBooks populateLorebookEntry)
         newEntry.key = extraction.keys || [];
+        newEntry.keysecondary = [];
         newEntry.content = extraction.content || '';
         newEntry.comment = extraction.name || 'Extracted Lore';
-        newEntry.enabled = true;
+
+        // Mode settings
         newEntry.constant = false;
-        newEntry.vectorized = false;
-        newEntry.selective = false;
+        newEntry.vectorized = true;  // Enable vectorized for better matching
+        newEntry.selective = true;
         newEntry.selectiveLogic = 0;
-        newEntry.caseSensitive = false;
-        newEntry.matchWholeWords = false;
-        newEntry.useGroupScoring = false;
-        newEntry.automationId = '';
-        newEntry.role = 0;
+
+        // Position and order
         newEntry.position = 4; // Before character defs
-        newEntry.depth = 4;
         newEntry.order = 100;
+        newEntry.depth = 4;
+
+        // Recursion settings
+        newEntry.preventRecursion = false;
+        newEntry.delayUntilRecursion = true;
+
+        // Other settings (matching MemoryBooks defaults)
+        newEntry.addMemo = true;
+        newEntry.disable = false;
+        newEntry.excludeRecursion = false;
         newEntry.probability = 100;
+        newEntry.useProbability = true;
         newEntry.group = '';
         newEntry.groupOverride = false;
         newEntry.groupWeight = 100;
         newEntry.scanDepth = null;
+        newEntry.caseSensitive = null;
+        newEntry.matchWholeWords = null;
+        newEntry.useGroupScoring = null;
+        newEntry.automationId = '';
+        newEntry.role = null;
+        newEntry.sticky = 0;
+        newEntry.cooldown = 0;
         newEntry.delay = 0;
-        newEntry.preventRecursion = false;
-        newEntry.delayUntilRecursion = false;
 
-        // Add metadata
+        // Add LoreExtractor metadata
         newEntry.loreExtractor = true;
         newEntry.loreExtractorCategory = extraction.category;
         newEntry.loreExtractorTimestamp = Date.now();
 
-        // Save the lorebook
-        await saveWorldInfo(lorebook.name, lorebook.data);
+        // Save the lorebook (third param true = immediate save, matching MemoryBooks)
+        await saveWorldInfo(lorebook.name, lorebook.data, true);
 
         console.log(`${LOG_PREFIX} Created entry: ${extraction.name}`);
         return newEntry;
@@ -258,6 +273,80 @@ async function createLoreEntry(lorebook, extraction) {
         console.error(`${LOG_PREFIX} Failed to create entry:`, e);
         return null;
     }
+}
+
+// ============================================================================
+// AI Completion Request (matches MemoryBooks pattern)
+// ============================================================================
+
+/**
+ * Send a completion request to the AI backend
+ * Based on MemoryBooks' sendRawCompletionRequest implementation
+ */
+async function sendCompletionRequest(prompt) {
+    const url = '/api/backends/chat-completions/generate';
+    const headers = getRequestHeaders();
+
+    // Get current API settings
+    const context = getContext();
+    const api = oai_settings?.chat_completion_source || 'openai';
+    const model = oai_settings?.openai_model || '';
+
+    const body = {
+        messages: [
+            { role: 'user', content: prompt }
+        ],
+        model: model,
+        temperature: 0.7,
+        chat_completion_source: api,
+    };
+
+    // Add max_tokens if available
+    if (oai_settings?.openai_max_tokens) {
+        body.max_tokens = oai_settings.openai_max_tokens;
+    }
+
+    console.log(`${LOG_PREFIX} Sending request to ${url} with api=${api}, model=${model}`);
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+        let errorText = '';
+        try {
+            errorText = await res.text();
+        } catch (e) {
+            errorText = '';
+        }
+        throw new Error(`AI request failed: ${res.status} ${res.statusText} - ${errorText}`);
+    }
+
+    const data = await res.json();
+
+    // Extract text from various response formats (matching MemoryBooks)
+    let text = '';
+
+    if (data.choices?.[0]?.message?.content) {
+        text = data.choices[0].message.content;
+    } else if (data.completion) {
+        text = data.completion;
+    } else if (data.choices?.[0]?.text) {
+        text = data.choices[0].text;
+    } else if (data.content && Array.isArray(data.content)) {
+        // Handle Claude's structured format
+        const textBlock = data.content.find(block =>
+            block && typeof block === 'object' && block.type === 'text' && block.text
+        );
+        text = textBlock?.text || '';
+    } else if (typeof data.content === 'string') {
+        text = data.content;
+    }
+
+    console.log(`${LOG_PREFIX} Response text length: ${text.length}`);
+    return text;
 }
 
 // ============================================================================
@@ -300,30 +389,26 @@ async function extractLore(forceExtract = false) {
 
         console.log(`${LOG_PREFIX} Sending extraction request...`);
 
-        // Send to AI using generateQuietPrompt (imported from script.js)
+        // Send to AI using direct API call (matches MemoryBooks pattern)
         let response;
         try {
-            if (!generateQuietPrompt) {
-                console.error(`${LOG_PREFIX} generateQuietPrompt not available`);
-                showNotification('Extraction failed: AI generation not available', 'error');
+            if (!getRequestHeaders) {
+                console.error(`${LOG_PREFIX} getRequestHeaders not available`);
+                showNotification('Extraction failed: API not available', 'error');
                 return;
             }
 
-            // Call with object parameter format (matches memory extension pattern)
-            response = await generateQuietPrompt({
-                quietPrompt: prompt,
-                skipWIAN: true,  // Skip world info to avoid recursion
-            });
-
+            response = await sendCompletionRequest(prompt);
             console.log(`${LOG_PREFIX} Raw response:`, response);
         } catch (e) {
             console.error(`${LOG_PREFIX} AI request failed:`, e);
-            showNotification('Extraction failed: AI request error', 'error');
+            showNotification('Extraction failed: ' + e.message, 'error');
             return;
         }
 
         if (!response) {
             console.log(`${LOG_PREFIX} No response from AI`);
+            showNotification('Extraction failed: Empty response from AI', 'error');
             return;
         }
 
@@ -703,10 +788,19 @@ async function init() {
             eventSource = scriptModule.eventSource;
             event_types = scriptModule.event_types;
             saveSettingsDebounced = scriptModule.saveSettingsDebounced;
-            generateQuietPrompt = scriptModule.generateQuietPrompt;
+            getRequestHeaders = scriptModule.getRequestHeaders;
         } catch (e) {
             console.error(`${LOG_PREFIX} Failed to import script.js:`, e);
             return;
+        }
+
+        // Import OpenAI settings for model info
+        try {
+            const openaiModule = await import('../../../openai.js');
+            oai_settings = openaiModule.oai_settings;
+        } catch (e) {
+            console.warn(`${LOG_PREFIX} Failed to import openai.js:`, e);
+            // Non-fatal - we can work without it
         }
 
         // Import world-info functions
