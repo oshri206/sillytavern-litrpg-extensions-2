@@ -297,9 +297,15 @@ async function sendCompletionRequest(prompt) {
     const headers = getRequestHeaders();
 
     // Get current API settings
-    const context = getContext();
     const api = oai_settings?.chat_completion_source || 'openai';
     const model = oai_settings?.openai_model || '';
+
+    // Determine max tokens - use settings or default to a reasonable value
+    const maxTokens = Math.max(
+        Number(oai_settings?.openai_max_tokens) || 0,
+        Number(oai_settings?.max_response) || 0,
+        2000  // Minimum default for extraction tasks
+    );
 
     const body = {
         messages: [
@@ -308,50 +314,90 @@ async function sendCompletionRequest(prompt) {
         model: model,
         temperature: 0.7,
         chat_completion_source: api,
+        max_tokens: maxTokens,
+        stream: false,  // Important: disable streaming to get complete response
     };
 
-    // Add max_tokens if available
-    if (oai_settings?.openai_max_tokens) {
-        body.max_tokens = oai_settings.openai_max_tokens;
+    console.log(`${LOG_PREFIX} Sending request to ${url}`);
+    console.log(`${LOG_PREFIX} API: ${api}, Model: ${model}, Max tokens: ${maxTokens}`);
+    console.log(`${LOG_PREFIX} Request body:`, JSON.stringify(body).substring(0, 500) + '...');
+
+    // Add timeout using AbortController (2 minutes)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        console.error(`${LOG_PREFIX} Request timed out after 120 seconds`);
+        controller.abort();
+    }, 120000);
+
+    let res;
+    try {
+        console.log(`${LOG_PREFIX} Starting fetch...`);
+        res = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body),
+            signal: controller.signal,
+        });
+        console.log(`${LOG_PREFIX} Fetch completed with status: ${res.status}`);
+    } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+            throw new Error('AI request timed out after 120 seconds');
+        }
+        console.error(`${LOG_PREFIX} Fetch error:`, fetchError);
+        throw fetchError;
+    } finally {
+        clearTimeout(timeoutId);
     }
-
-    console.log(`${LOG_PREFIX} Sending request to ${url} with api=${api}, model=${model}`);
-
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(body),
-    });
 
     if (!res.ok) {
         let errorText = '';
         try {
             errorText = await res.text();
         } catch (e) {
-            errorText = '';
+            errorText = '(could not read error body)';
         }
+        console.error(`${LOG_PREFIX} Response not OK: ${res.status} ${res.statusText}`);
+        console.error(`${LOG_PREFIX} Error body: ${errorText}`);
         throw new Error(`AI request failed: ${res.status} ${res.statusText} - ${errorText}`);
     }
 
-    const data = await res.json();
+    console.log(`${LOG_PREFIX} Reading response body...`);
+    let data;
+    try {
+        const responseText = await res.text();
+        console.log(`${LOG_PREFIX} Raw response text (first 500 chars): ${responseText.substring(0, 500)}`);
+        data = JSON.parse(responseText);
+        console.log(`${LOG_PREFIX} Response parsed successfully`);
+    } catch (parseError) {
+        console.error(`${LOG_PREFIX} Failed to parse response:`, parseError);
+        throw new Error('Failed to parse AI response as JSON');
+    }
 
     // Extract text from various response formats (matching MemoryBooks)
     let text = '';
 
     if (data.choices?.[0]?.message?.content) {
         text = data.choices[0].message.content;
+        console.log(`${LOG_PREFIX} Extracted from choices[0].message.content`);
     } else if (data.completion) {
         text = data.completion;
+        console.log(`${LOG_PREFIX} Extracted from completion`);
     } else if (data.choices?.[0]?.text) {
         text = data.choices[0].text;
+        console.log(`${LOG_PREFIX} Extracted from choices[0].text`);
     } else if (data.content && Array.isArray(data.content)) {
         // Handle Claude's structured format
         const textBlock = data.content.find(block =>
             block && typeof block === 'object' && block.type === 'text' && block.text
         );
         text = textBlock?.text || '';
+        console.log(`${LOG_PREFIX} Extracted from content array`);
     } else if (typeof data.content === 'string') {
         text = data.content;
+        console.log(`${LOG_PREFIX} Extracted from content string`);
+    } else {
+        console.warn(`${LOG_PREFIX} Unknown response format:`, JSON.stringify(data).substring(0, 500));
     }
 
     console.log(`${LOG_PREFIX} Response text length: ${text.length}`);
