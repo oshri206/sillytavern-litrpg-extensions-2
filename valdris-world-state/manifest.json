@@ -1,0 +1,11 @@
+{
+    "display_name": "Valdris World State",
+    "loading_order": 4,
+    "requires": ["valdris-core"],
+    "optional": ["valdris-time-celestial"],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Valdris Suite",
+    "version": "1.0.0",
+    "description": "World environment tracking - locations, regions, hazards, and local laws"
+}
