@@ -492,6 +492,129 @@ async function applyStatusGains(statuses) {
 async function parseMessageForChanges(text) {
     console.log('[VMasterTracker] parseMessageForChanges called');
 
+    // --- Preprocessing: normalize input & extract optional STATS block ---
+    let messageText = (typeof text === 'string') ? text
+        : (text && text.content) ? text.content
+        : (text && text.mes) ? text.mes
+        : String(text || '');
+
+    function stripFormatting(s){
+        return String(s || '')
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/__(.*?)__/g, '$1')
+            .replace(/\*(.*?)\*/g, '$1')
+            .replace(/_(.*?)_/g, '$1')
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+            .replace(/<\/?[^>]+(>|$)/g, '')
+            .replace(/[\u2018\u2019\u201C\u201D]/g, "'")
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    messageText = stripFormatting(messageText);
+
+    // If a repo file valdris-always-on-full.json exists, embed/search it for lore matches.
+    // This block expects a JSON array or an object with `entries` -> array. If not present, it is a no-op.
+    try {
+      // VALDRIS_LOREBOOK will be injected at build time if the file exists; fallback to no-op otherwise.
+      const _VALDRIS_RAW = (typeof VALDRIS_LOREBOOK !== 'undefined') ? VALDRIS_LOREBOOK : null;
+      if (_VALDRIS_RAW) {
+        const LORE_ARR = Array.isArray(_VALDRIS_RAW) ? _VALDRIS_RAW : (_VALDRIS_RAW.entries || Object.values(_VALDRIS_RAW));
+        // quick helpers
+        const extractCandidates = (msg) => {
+          const set = new Set();
+          const bracket = /\[([^\]]+)\]/g; let m;
+          while ((m = bracket.exec(msg)) !== null) set.add(m[1].trim());
+          const cap = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g;
+          while ((m = cap.exec(msg)) !== null) {
+            const s = m[1].trim();
+            if (s.length > 3) set.add(s);
+          }
+          return Array.from(set);
+        };
+        const readEntry = (e) => {
+          if (!e) return null;
+          const out = { title: e.title || e.name || null, text: '', stats: null };
+          if (typeof e.description === 'string') out.text = e.description;
+          else if (typeof e.content === 'string') out.text = e.content;
+          else {
+            const pieces = [];
+            for (const k of ['desc','summary','bio','body']) if (e[k]) pieces.push(String(e[k]));
+            out.text = pieces.join('\n').trim();
+          }
+          const stats = {};
+          for (const k of Object.keys(e||{})) {
+            const v = e[k];
+            if (typeof v === 'number') stats[k.toLowerCase()] = v;
+            if (typeof v === 'string' && /^[0-9+-]+$/.test(v)) stats[k.toLowerCase()] = Number(v);
+          }
+          const textStats = out.text.match(/([A-Za-z]{2,20})[:\s-]+([+-]?\d{1,6})/g);
+          if (textStats) {
+            for (const kv of textStats) {
+              const mm = kv.match(/([A-Za-z]{2,20})[:\s-]+([+-]?\d{1,6})/);
+              if (mm) stats[mm[1].toLowerCase()] = Number(mm[2]);
+            }
+          }
+          if (Object.keys(stats).length) out.stats = stats;
+          return out;
+        };
+
+        const candidates = extractCandidates(messageText);
+        const found = [];
+        for (const c of candidates) {
+          for (const e of LORE_ARR) {
+            const t = (e.title||e.name||'').toLowerCase();
+            if (!t) continue;
+            if (t.includes(c.toLowerCase()) || c.toLowerCase().includes(t)) {
+              const re = readEntry(e); if (re) found.push(re);
+            }
+          }
+        }
+        if (!found.length) {
+          for (const e of LORE_ARR) {
+            const t = (e.title||e.name||'').toLowerCase();
+            if (!t) continue;
+            if (messageText.toLowerCase().includes(t)) {
+              const re = readEntry(e); if (re) { found.push(re); break; }
+            }
+          }
+        }
+
+        if (found.length) {
+          const uniq = []; const seen = new Set();
+          for (const f of found) {
+            const key = (f.title||'').toLowerCase();
+            if (seen.has(key)) continue; seen.add(key); uniq.push(f);
+          }
+          const loreText = uniq.map(u => (u.title ? ('['+u.title+']\n') : '') + (u.text||'')).join('\n\n').trim();
+          const mergedStats = {}; for (const u of uniq) if (u.stats) Object.assign(mergedStats, u.stats);
+          if (loreText) messageText += '\n\n---LOREBOOK---\n' + loreText;
+          if (Object.keys(mergedStats).length && !/---STATS---/i.test(messageText)) {
+            messageText += '\n\n---STATS---\n' + JSON.stringify(mergedStats);
+          }
+        }
+      }
+    } catch(e) {
+      console.warn('[ValdrisLoreAug] augmentation error', e);
+    }
+
+    // parse STATS block if present
+    let parsedStats = null;
+    try {
+        const m = messageText.match(/---STATS---\s*({[\s\S]*})/i);
+        if (m && m[1]) {
+            parsedStats = JSON.parse(m[1]);
+            console.log('[VMasterTracker] Parsed STATS block:', parsedStats);
+        }
+    } catch (e) {
+        console.warn('[VMasterTracker] STATS parse failed', e);
+        parsedStats = null;
+    }
+
+    text = messageText;
+    console.log('[VMasterTracker DEBUG] cleaned text for parsing:', text);
+    // --- end preprocessing ---
+
     const state = getState();
     const autoParsing = state.settings?.autoParsing;
     if (!autoParsing?.enabled || !text) {
@@ -501,9 +624,46 @@ async function parseMessageForChanges(text) {
 
     const categories = autoParsing.parseCategories || {};
     console.log('[VMasterTracker] Parse categories:', Object.keys(categories).filter(k => categories[k]));
-
     const changes = [];
 
+    // Convert parsedStats into changes compatible with the existing apply/update functions
+    if (parsedStats) {
+        try {
+            if (typeof parsedStats.hp !== 'undefined' && parsedStats.hp !== 0) {
+                const hpVal = Number(parsedStats.hp);
+                if (!Number.isNaN(hpVal)) {
+                    if (hpVal < 0) {
+                        const amt = Math.abs(hpVal);
+                        changes.push({ summary: `-${amt} HP`, apply: () => applyResourceDelta('hp.current', -amt, 0, state.hp?.max ?? 0) });
+                    } else {
+                        const amt = hpVal;
+                        changes.push({ summary: `+${amt} HP`, apply: () => applyResourceDelta('hp.current', amt, 0, state.hp?.max ?? 0) });
+                    }
+                }
+            }
+            if (typeof parsedStats.gold !== 'undefined') {
+                const g = Number(parsedStats.gold);
+                if (!Number.isNaN(g) && g !== 0) {
+                    if (g < 0) changes.push({ summary: `${g} gold`, apply: () => applyResourceDelta('currencies.gold', g, 0, Number.MAX_SAFE_INTEGER) });
+                    else changes.push({ summary: `+${g} gold`, apply: () => applyResourceDelta('currencies.gold', g, 0, Number.MAX_SAFE_INTEGER) });
+                }
+            }
+            if (typeof parsedStats.xp !== 'undefined') {
+                const xp = Number(parsedStats.xp);
+                if (!Number.isNaN(xp) && xp !== 0) changes.push({ summary: `${xp > 0 ? '+' : ''}${xp} XP`, apply: () => applyResourceDelta('xp.current', xp, 0, Number.MAX_SAFE_INTEGER) });
+            }
+            if (parsedStats.items && Array.isArray(parsedStats.items) && parsedStats.items.length) {
+                const items = parsedStats.items.map(i => String(i).trim()).filter(Boolean);
+                if (items.length) changes.push({ summary: `Items: ${items.join(', ')}`, apply: () => applyItemGains(items) });
+            }
+            if (parsedStats.status && Array.isArray(parsedStats.status) && parsedStats.status.length) {
+                const statuses = parsedStats.status.map(s => String(s).trim()).filter(Boolean);
+                if (statuses.length) changes.push({ summary: `Status: ${statuses.join(', ')}`, apply: () => applyStatusGains(statuses) });
+            }
+        } catch(e) { console.warn('[VMasterTracker] Failed to convert parsedStats to changes', e); }
+    }
+
+    // -- existing regex logic (keeps original patterns & behavior) --
     const patterns = {
         damage: /(?:takes?|receives?|suffers?)\s+(\d+)\s+(?:points?\s+of\s+)?damage/gi,
         healing: /(?:heals?|recovers?|restores?)\s+(\d+)\s+(?:HP|health|hit\s+points?)/gi,
