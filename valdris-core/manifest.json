@@ -1,0 +1,13 @@
+{
+    "display_name": "Valdris Core",
+    "loading_order": 1,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Lite",
+    "version": "1.0.0",
+    "description": "Core data bus for Valdris extension suite. Provides central state management, cross-extension messaging, and AI context injection.",
+    "auto_update": false,
+    "minimum_client_version": "1.12.0"
+}
