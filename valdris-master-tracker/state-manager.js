@@ -468,7 +468,11 @@ function getSTContext() {
  */
 function getChatMetadata() {
     const ctx = getSTContext();
-    return ctx?.chatMetadata ?? null;
+    if (!ctx) return null;
+    if (!ctx.chatMetadata) {
+        ctx.chatMetadata = {};
+    }
+    return ctx.chatMetadata;
 }
 
 /**
